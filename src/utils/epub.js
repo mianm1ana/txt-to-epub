@@ -80,7 +80,7 @@ export function parseChapters(text) {
         }
 
         // 如果还没有任何章节,就先建一个默认的「正文」章节
-        if (!curretnChapter) {
+        if (!currentChapter) {
             currentChapter = {
                 title: "正文",
                 paragraphs: [],

@@ -90,7 +90,7 @@ function App() {
 
   async function handleEncodingChange(event) {
     const nextEncoding = event.target.value;
-    setEncoding(newEncoding);
+    setEncoding(nextEncoding);
 
     if (!file) {
       return;// 还没选文件就只改状态,不读盘
@@ -115,13 +115,13 @@ function App() {
       return;
     }
 
-    setConvverting(true);
+    setConverting(true);
     setStatus("正在生成EPUB...");
 
     try {
       // 书名兜底: 没填就用文件名
       const bookTitle =
-        title.trim() || file.name.reaplace(/\.txt$/i, "");
+        title.trim() || file.name.replace(/\.txt$/i, "");
       
       // 核心: 生成EPUB Blob + 章节数
       const { blob, chapterCount } = await createEpub({
@@ -131,7 +131,7 @@ function App() {
       });
       
       // --- 触发浏览器下载 ---
-      const downloadUrl = Url.createObjectURL(blob); // 内存里的临时地址
+      const downloadUrl = URL.createObjectURL(blob); // 内存里的临时地址
       const link = document.createElement("a");
 
       link.href = downloadUrl;
@@ -204,7 +204,7 @@ function App() {
            {/* 作者（会写进 EPUB 元数据） */}
            <label className="field">
             <span>作者</span>
-            <Input
+            <input
               type="text"
               value={author}
               onChange={(event) => setAuthor(event.target.value)}
@@ -232,7 +232,7 @@ function App() {
           <div className="preview-header">
             <h2>内容预览</h2>
             <span>
-              {text ? `${text.length.toLocaleString}字符` : "暂无内容"}
+              {text ? `${text.length.toLocaleString()}字符` : "暂无内容"}
             </span>
           </div>
 
