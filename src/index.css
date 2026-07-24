@@ -1,111 +1,42 @@
+/* ========== 全局根变量 / 默认样式（作用于整个文档） ========== */
+/* :root 就是 <html> 元素。
+   这里写的属性会被整页继承，相当于“全站默认皮肤”。 */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* 默认字体栈：
+     Inter（若系统/网页已加载）→ 系统 UI 字体 → 各平台原生字体 → 最后 sans-serif 兜底。
+     保证 Windows / macOS / Linux / 手机上看起来都比较干净统一。 */
+  font-family:
+    Inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* 默认文字颜色：深灰黑，比纯黑 #000 更柔和，长时间阅读更舒服 */
+  color: #202124;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  /* 整页背景色：浅灰蓝，让中间的白色表单/预览卡片“浮”出来 */
+  background: #f4f6f8;
+
+  /* 关闭浏览器自动合成伪粗体/伪斜体。
+     避免没有对应字重时文字发糊、发虚。 */
   font-synthesis: none;
+
+  /* 优化文字渲染：更注重可读性（字形更清晰），
+     对标题和正文都比较友好。 */
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
+/* ========== 页面主体 ========== */
 body {
-  margin: 0;
+  margin: 0;              /* 去掉浏览器默认 8px 边距，避免四周留白不均 */
+  min-width: 320px;       /* 防止极窄窗口把布局挤烂（约等于小屏手机宽度） */
+  min-height: 100vh;      /* 至少撑满一屏高度；内容少时背景也能铺满 */
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+/* ========== 表单控件字体统一 ========== */
+/* button / input / select 在很多浏览器里默认不继承 body 的 font-family，
+   会变成系统控件字体，和页面其它文字不一致。
+   这里强制继承，让输入框、下拉框、按钮和正文用同一套字体。 */
+button,
+input,
+select {
+  font-family: inherit;
 }

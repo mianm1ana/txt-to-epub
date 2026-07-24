@@ -1,184 +1,169 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+/* ========== 全局根节点 ========== */
+/* Vite + React 默认把应用挂在 #root 上。
+   让根节点至少占满一屏高度，避免内容少时页面显得很矮。 */
+#root {
+  min-height: 100vh;
 }
 
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+/* ========== 页面整体容器 ========== */
+/* 内容最大宽度 1100px，小屏幕时左右各留 16px 边距（calc(100% - 32px)）。
+   水平居中，上下内边距 40px。 */
+.page {
+  width:min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+/* ========== 页头（标题 + 说明） ========== */
+.header {
+  margin-bottom: 28px; /* 和下方工作区拉开距离 */
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+.header h1 {
+  margin: 0; /* 去掉默认的上外边距 */
+  font-size: 32px;
+  letter-spacing: 0; /* 中文标题一般不需要字距 */
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+.header p {
+  margin: 8px 0 0; /* 只留上边距,贴近标题 */
+  color: #5f6368; /* 次要说明用灰色 */
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+/* ========== 主工作区：左侧表单 + 右侧预览 ========== */
+/* 两列网格：左栏固定约 320px，右栏吃掉剩余空间。
+   minmax(0, 1fr) 防止预览区超长文本把布局撑破。 */
+.workspace {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 24px; /* 两栏之间的间距 */
+  align-items: start; /* 顶部对齐,表达不会被预览区拉高 */
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+/* ========== 左侧表单卡片 ========== */
+.form {
+  display: grid;
+  gap: 18px;  /* 表单项之间的垂直间距 */
+  padding: 22px;
+  border: 1px solid #d9dde3;
+  border-radius: 8px;
+  background: #fff;
 }
 
-.ticks {
-  position: relative;
+/* 单个表单项：标签在上、控件在下 */
+.field {
+  display: grid;
+  gap: 8px; /* 标签和控件之间的间距 */
+}
+
+.field span {
+  font-size: 14px;
+  font-weight: 600; /* 标签加粗，更容易扫读 */
+}
+
+/* 输入框、下拉框统一外观 */
+.field input,
+.field select {
   width: 100%;
+  box-sizing: border-box; /* padding/border 算进 width，避免撑出容器 */
+  min-height: 42px;       /* 触摸/点击区域更舒适 */
+  padding: 9px 11px;
+  border: 1px solid #b9c0c9;
+  border-radius: 6px;
+  background: #fff;
+  color: #202124;
+  font: inherit;          /* 继承页面字体，避免系统默认控件字体不一致 */
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
+/* 聚焦时的可见焦点环（键盘可访问性 + 视觉反馈） */
+.field input:focus,
+.field select:focus {
+  outline: 2px solid #1769aa;
+  outline-offset: 1px;
+}
+
+/* ========== 主操作按钮 ========== */
+.convert-button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 6px;
+  background: #1769aa;  /* 主色蓝 */
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 禁用态：转换中 / 未选文件时，灰色且不可点 */
+.convert-button:disabled {
+  background: #a9b0b8;
+  cursor: not-allowed;
+}
+
+/* 状态提示文案（已读取章节数、转换中、成功/失败等） */
+.status {
+  min-height: 20px;     /* 没文字时也占一点高度，减少布局跳动 */
+  color: #4a525a;
+  font-size: 14px;
+}
+
+/* ========== 右侧内容预览 ========== */
+.preview {
+  min-width: 0;         /* 网格子项默认 min-width:auto，设 0 才能正确收缩、出现滚动条 */
+}
+
+/* 预览区标题行：左边“内容预览”，右边字符数 */
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.preview-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+/* 次要信息统一灰色 */
+.preview-header span,
+.preview-note {
+  color: #687078;
+  font-size: 14px;
+}
+
+/* 真正显示 TXT 内容的区域
+   用 pre 保留换行；pre-wrap + overflow-wrap 让长行可断行，避免横向撑爆 */
+.preview pre {
+  box-sizing: border-box;
+  min-height: 500px;    /* 空内容时也有一块稳定高度 */
+  max-height: 70vh;     /* 太高就内部滚动，不把整页拉很长 */
+  margin: 0;
+  padding: 22px;
+  overflow: auto;       /* 内容超出时滚动 */
+  border: 1px solid #d9dde3;
+  border-radius: 8px;
+  background: #fff;
+  white-space: pre-wrap;      /* 保留换行，同时允许自动折行 */
+  overflow-wrap: anywhere;    /* 超长无空格字符串也能断开 */
+  font-family: serif;         /* 阅读感更接近电子书 */
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* ========== 小屏幕适配（手机 / 窄窗口） ========== */
+/* 宽度 ≤ 760px 时改成单列：表单在上，预览在下 */
+@media (max-width: 760px) {
+  .page {
+    padding: 24px 0;    /* 上下边距稍减，省一点纵向空间 */
   }
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
+  .workspace {
+    grid-template-columns: 1fr; /* 取消左右分栏 */
   }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
+
+  .preview pre {
+    min-height: 360px;  /* 手机上预览区不必那么高 */
   }
 }
