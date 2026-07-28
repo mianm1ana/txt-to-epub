@@ -1,8 +1,5 @@
 /**
  * epub生成工具,js
- * 1. 为什么有些函数直接是function,有些前面要加export,有些更是export async ....
- * 
- * 2. 
  */
 
 import JSZip from "jszip";
