@@ -1,22 +1,16 @@
 import { useState } from 'react'
-// 从工具文件引入: 生成EPUB 解码TXT文件 拆分章节
-import {
-  createEpub,
-  decodeTxtFile,
-  parseChapters,
-} from "./utils/epub";
+
+import { createEpub } from "./utils/epub"
+import { decodeTxtFile, parseChapters } from "./utils/text";
+import { downloadBlob, safeFilename } from "./utils/download"
+
+import ChapterList from "./components/ChapterList"
+import ChapterPreview from './components/ChapterPreview';
+import BookForm from './components/BookForm';
+
 import './App.css';
 
-/**
- * 把书名转成安全的文件名
- * Windows / macOS 不允许文件名出现 \ / : * ? " < > | 这些字符
- * 出现就替换成下划线，避免下载失败
- */
-function safeFilename(value) {
-  return value
-    .replace(/[\\/:*?"<>|]/g, "_")
-    .trim() || "book";
-}
+
 
 function App() {
   // --- 页面状态 ---
@@ -24,7 +18,9 @@ function App() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [encoding, setEncoding] = useState("auto"); // 文本编码：auto / utf-8 / gb18030
-  const [text, setText] = useState(""); // 解码后的整本书纯文本
+  const [chapters, setChapters] = useState([]); // 解析出来的全部章节
+  const [selectedChapterIndex, setSelectedChapterIndex] = useState(0); // 当前查看的是第几章
+  const [epubBlob, setEpubBlob] = useState(null); // 生成好的 EPUB 文件
   const [status, setStatus] = useState(""); // 底部状态提示文案
   const [converting, setConverting] = useState(false); // 是否正在生成 EPUB（用来禁用按钮、显示“正在转换...”）
 
@@ -48,12 +44,13 @@ function App() {
       selectedEncoding
     );
 
-    // 存进state,后面预览和生成epub都会用到
-    setText(decodedText);
-
     // 顺便用同样的规则拆一遍章节,给用户看识别结果
-    const chapters = parseChapters(decodedText);
-    setStatus(`已读取,识别到 ${chapters.length} 章`);
+    const parsedChapters = parseChapters(decodedText);
+
+    setChapters(parsedChapters);
+    setSelectedChapterIndex(0); // 选中第一章
+    setEpubBlob(null); // 重新选文件后,清空之前生成的EPUB Blob
+    setStatus(`已读取,识别到 ${parsedChapters.length} 章`);
   }
 
   /**
@@ -107,15 +104,16 @@ function App() {
    * 点击生成epub或表单提交时触发
    * 真正调用createEpub,然后用浏览器下载
    */
-  async function handleConvert(event) {
+  async function handleGenerate(event) {
     event.preventDefault(); // 阻止表单默认提交行为
 
-    if (!file || !text) {
+    if (!file || chapters.length === 0) {
       setStatus("请先选择TXT文件");
       return;
     }
 
     setConverting(true);
+    setEpubBlob(null);
     setStatus("正在生成EPUB...");
 
     try {
@@ -127,34 +125,38 @@ function App() {
       const { blob, chapterCount } = await createEpub({
         title: bookTitle,
         author: author.trim() || "未知作者",
-        text,
+        chapters,
       });
-      
-      // --- 触发浏览器下载 ---
-      const downloadUrl = URL.createObjectURL(blob); // 内存里的临时地址
-      const link = document.createElement("a");
 
-      link.href = downloadUrl;
-      link.download = `${safeFilename(bookTitle)}.epub`;// 下载文件名称
-
-      document.body.appendChild(link);
-      link.click(); // 模拟点击下载
-      link.remove();
-
-      //下载触发后,释放内存里的Object URL,避免泄露
-      setTimeout(() => {
-        URL.revokeObjectURL(downloadUrl);
-      }, 1000);
-
-      setStatus(`转换完成,共 ${chapterCount} 章节`);
+      setEpubBlob(blob); // 保存生成的EPUB Blob对象,方便预览或下载
+      setStatus(`EPUB生成成功,共 ${chapterCount} 章节`);
     }catch (error) {
       console.error(error);
-      setStatus(`转换失败: ${error.message}`);
+      setStatus(`生成EPUB失败: ${error.message}`);
     }finally {
-      // 无论成功失败,都结束“转换中”状态
       setConverting(false);
     }
   }
+      
+  /**
+   * 下载
+   */
+
+  function handleDownload() {
+    if (!epubBlob) {
+      setStatus("请先生成EPUB");
+      return;
+    }
+
+    const bookTitle = title.trim() || file?.name.replace(/\.txt$/i, "") || "book";
+
+    downloadBlob(
+      epubBlob,
+      `${safeFilename(bookTitle)}.epub`,
+    )
+  }
+
+  const selectedChapter = chapters[selectedChapterIndex];
 
   // --- 界面 ---
   return (
@@ -166,87 +168,29 @@ function App() {
 
       <div className="workspace">
         {/* 左侧：表单操作区 */}
-        <form className="form" onSubmit={handleConvert}>
-          {/* 选文件 */}
-          <label className="field">
-            <span>TXT 文件</span>
-            <input
-              type="file"
-              accept=".txt,text/plain"
-              onChange={handleFileChange}
-            />
-          </label>
-
-          {/* 编码选择: 乱码时手动切 */}
-          <label className="field">
-            <span>文本编码</span>
-            <select
-              value={encoding}
-              onChange={handleEncodingChange}
-            >
-              <option value="auto">自动检测</option>
-              <option value="utf-8">UTF-8</option>
-              <option value="gb18030">GBK / GB18030</option>
-            </select>
-          </label>
-
-          {/* 书名（会写进 EPUB 元数据 + 下载文件名） */}
-          <label className="field">
-            <span>书名</span>
-            <input
-              type="text"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder="请输入书名"
-            />
-          </label>
-
-           {/* 作者（会写进 EPUB 元数据） */}
-           <label className="field">
-            <span>作者</span>
-            <input
-              type="text"
-              value={author}
-              onChange={(event) => setAuthor(event.target.value)}
-              placeholder="请输入作者名"
-            />
-          </label>
-
-          {/* 提交按钮 */}
-          <button
-            className="convert-button"
-            type="submit"
-            disabled={converting || !file}
-          >
-            {converting ? "正在转换..." : "生成 EPUB"}
-          </button>
-
-          {/* 状态提示（aria-live 方便读屏软件） */}
-          <div className="status" aria-live="polite">
-            {status || "请选择一个TXT文件"}
-          </div>
-        </form>
-
-        {/* 右侧：文本预览（只显示前 10000 字，避免超大 TXT 卡死页面） */}
-        <section className="preview">
-          <div className="preview-header">
-            <h2>内容预览</h2>
-            <span>
-              {text ? `${text.length.toLocaleString()}字符` : "暂无内容"}
-            </span>
-          </div>
-
-          <pre>
-            {text
-              ? text.slice(0, 10000)
-              : "选择文件后在这里预览文本"}
-          </pre>
-
-          {text.length > 10000 && (
-            <p className="preview-note">
-              为保证页面流畅,仅显示前10000个字符
-            </p>
-          )}
+        <BookForm
+          title={title}
+          author={author}
+          encoding={encoding}
+          converting={converting}
+          canGenerate={chapters.length > 0}
+          canDownload={Boolean(epubBlob)}
+          status={status}
+          onFileChange={handleFileChange}
+          onEncodingChange={handleEncodingChange}
+          onTitleChange={setTitle}
+          onAuthorChange={setAuthor}
+          onGenerate={handleGenerate}
+          onDownload={handleDownload}
+        />
+        
+        <section className="chapter-workspace">
+          <ChapterList
+            chapters={chapters}
+            selectedIndex={selectedChapterIndex}
+            onSelect={setSelectedChapterIndex}
+          />
+          <ChapterPreview chapter={selectedChapter} />
         </section>
       </div>
     </main>

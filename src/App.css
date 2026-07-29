@@ -100,6 +100,29 @@
   cursor: not-allowed;
 }
 
+/* 下载按钮使用次级样式，和主要的“生成 EPUB”操作区分开 */
+.download-button {
+  min-height: 44px;
+  border: 1px solid #1769aa;
+  border-radius: 6px;
+  background: #fff;
+  color: #1769aa;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.download-button:hover:not(:disabled) {
+  background: #eef5fb;
+}
+
+.download-button:disabled {
+  border-color: #c5cbd2;
+  color: #9aa1a9;
+  background: #f5f6f7;
+  cursor: not-allowed;
+}
+
 /* 状态提示文案（已读取章节数、转换中、成功/失败等） */
 .status {
   min-height: 20px;     /* 没文字时也占一点高度，减少布局跳动 */
@@ -107,49 +130,107 @@
   font-size: 14px;
 }
 
-/* ========== 右侧内容预览 ========== */
-.preview {
-  min-width: 0;         /* 网格子项默认 min-width:auto，设 0 才能正确收缩、出现滚动条 */
-}
-
-/* 预览区标题行：左边“内容预览”，右边字符数 */
-.preview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ========== 右侧章节目录与内容预览 ========== */
+.chapter-workspace {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 16px;
-  margin-bottom: 12px;
+  min-width: 0;
 }
 
-.preview-header h2 {
+.chapter-list,
+.chapter-preview {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 70vh;
+  min-height: 500px;
+  border: 1px solid #d9dde3;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.chapter-list {
+  padding: 16px 10px;
+  overflow-y: auto;
+}
+
+.chapter-list h2,
+.chapter-preview h2 {
   margin: 0;
-  font-size: 20px;
+  color: #202124;
+  font-size: 18px;
 }
 
-/* 次要信息统一灰色 */
-.preview-header span,
-.preview-note {
+.chapter-list h2 {
+  padding: 0 8px 12px;
+  border-bottom: 1px solid #e5e8ec;
+  margin-bottom: 8px;
+}
+
+.chapter-list > p {
+  padding: 8px;
   color: #687078;
   font-size: 14px;
 }
 
-/* 真正显示 TXT 内容的区域
-   用 pre 保留换行；pre-wrap + overflow-wrap 让长行可断行，避免横向撑爆 */
-.preview pre {
-  box-sizing: border-box;
-  min-height: 500px;    /* 空内容时也有一块稳定高度 */
-  max-height: 70vh;     /* 太高就内部滚动，不把整页拉很长 */
-  margin: 0;
-  padding: 22px;
-  overflow: auto;       /* 内容超出时滚动 */
-  border: 1px solid #d9dde3;
-  border-radius: 8px;
-  background: #fff;
-  white-space: pre-wrap;      /* 保留换行，同时允许自动折行 */
-  overflow-wrap: anywhere;    /* 超长无空格字符串也能断开 */
-  font-family: serif;         /* 阅读感更接近电子书 */
+.chapter-button {
+  display: block;
+  width: 100%;
+  margin: 2px 0;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #30343a;
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chapter-button:hover {
+  background: #eef3f8;
+}
+
+.chapter-button:focus-visible {
+  outline: 2px solid #1769aa;
+  outline-offset: -2px;
+}
+
+.chapter-button.active {
+  background: #1769aa;
+  color: #fff;
+  font-weight: 600;
+}
+
+.chapter-preview {
+  padding: 22px 26px;
+  overflow-y: auto;
+}
+
+.chapter-preview > p {
+  color: #687078;
+}
+
+.chapter-preview h2 {
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e8ec;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.chapter-content {
+  overflow-wrap: anywhere;
+  font-family: serif;
   font-size: 16px;
-  line-height: 1.8;
+  line-height: 1.9;
+}
+
+.chapter-content p {
+  margin: 0.65em 0;
+  text-indent: 2em;
 }
 
 /* ========== 小屏幕适配（手机 / 窄窗口） ========== */
@@ -163,7 +244,18 @@
     grid-template-columns: 1fr; /* 取消左右分栏 */
   }
 
-  .preview pre {
-    min-height: 360px;  /* 手机上预览区不必那么高 */
+  .chapter-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .chapter-list {
+    height: auto;
+    min-height: 0;
+    max-height: 240px;
+  }
+
+  .chapter-preview {
+    height: 60vh;
+    min-height: 360px;
   }
 }
