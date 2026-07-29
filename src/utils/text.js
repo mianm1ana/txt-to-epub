@@ -25,55 +25,118 @@ export async function decodeTxtFile(file, encoding = "auto") {
 }
 
 /**
- * 把整本TXT文本按章节拆分
- * 规则: 识别“第X章 / 第X回 / Chapter 1 / 序章 / 楔子 / 前言 / 后记 / 尾声”等标题
- * @param {string} text - 整本书的纯文本
- * @returns {Array<{title: string, paragraphs: string[]}>}
+ * @typedef {Object} BookSection
+ * @property {"intro" | "volume" | "chapter"} type
+ * @property {string} title
+ * @property {string} volumeTitle
+ * @property {string[]} paragraphs
  */
-export function parseChapters(text) {
-    // 统一换行符为 \n,再按行切开
+
+/**
+ * 把整本 TXT 拆成“简介 / 卷 / 章”。
+ *
+ * 规则：
+ * 1. 第一个卷或章标题之前的内容是简介。
+ * 2. “第X卷”是卷。
+ * 3. “第X章/节/回/篇”、Chapter N、序章等是章节。
+ * 4. 没有任何结构标题时，整本书作为一个“正文”章节。
+ *
+ * @param {string} text - 整本书的纯文本
+ * @returns {BookSection[]}
+ */
+export function parseBookSections(text) {
     const lines = text
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .split("\n");
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .split("\n");
 
-    // 章节中的标题
-    const chapterPattern = /^(第[一二三四五六七八九十百千万零〇两0-9]+[章节回卷].*|Chapter\s+\d+.*|序章.*|楔子.*|前言.*|后记.*|尾声.*)$/i;
+    const chineseNumber = "一二三四五六七八九十百千万零〇两0-9";
+    const volumePattern = new RegExp(`^第[${chineseNumber}]+卷.*$`);
+    const chapterPattern = new RegExp(
+        `^(第[${chineseNumber}]+[章节回篇].*|Chapter\\s+\\d+.*|序章.*|楔子.*|前言.*|后记.*|尾声.*)$`,
+        "i",
+    );
 
-    const chapters = [];
-    let currentChapter = null; //当前正在收集的章节
-    
+    /** @type {BookSection[]} */
+    const sections = [];
+    const beforeFirstHeading = [];
+
+    let currentSection = null;
+    let currentVolumeTitle = "";
+    let foundHeading = false;
+
+    function addIntroIfNeeded() {
+        if (beforeFirstHeading.length === 0) {
+            return;
+        }
+
+        sections.push({
+            type: "intro",
+            title: "简介",
+            volumeTitle: "",
+            paragraphs: [...beforeFirstHeading],
+        });
+        beforeFirstHeading.length = 0;
+    }
+
     for (const originalLine of lines) {
-        const line = originalLine.trim(); // 去掉首尾空白
+        const line = originalLine.trim();
 
-        // 如果这一行是章节标题
-        if (chapterPattern.test(line)) {
-            // 开启新章节
-            currentChapter = {
-                title: line,
-                paragraphs: [],
-            };
-            chapters.push(currentChapter);
+        if (!line) {
             continue;
         }
 
-        // 如果还没有任何章节,就先建一个默认的「正文」章节
-        if (!currentChapter) {
-            currentChapter = {
-                title: "正文",
+        if (volumePattern.test(line)) {
+            if (!foundHeading) {
+                addIntroIfNeeded();
+            }
+
+            foundHeading = true;
+            currentVolumeTitle = line;
+            currentSection = {
+                type: "volume",
+                title: line,
+                volumeTitle: "",
                 paragraphs: [],
             };
-            chapters.push(currentChapter);
-        } 
+            sections.push(currentSection);
+            continue;
+        }
 
-        // 非空行就当作段落加进去
-        if (line) {
-            currentChapter.paragraphs.push(line);
+        if (chapterPattern.test(line)) {
+            if (!foundHeading) {
+                addIntroIfNeeded();
+            }
+
+            foundHeading = true;
+            currentSection = {
+                type: "chapter",
+                title: line,
+                volumeTitle: currentVolumeTitle,
+                paragraphs: [],
+            };
+            sections.push(currentSection);
+            continue;
+        }
+
+        if (!foundHeading) {
+            beforeFirstHeading.push(line);
+            continue;
+        }
+
+        if (currentSection) {
+            currentSection.paragraphs.push(line);
         }
     }
 
-    // 过滤掉安全空的章节
-    return chapters.filter(
-        (chapter) => chapter.title || chapter.paragraphs.length > 0
-    );
+    if (!foundHeading && beforeFirstHeading.length > 0) {
+        return [{
+            type: "chapter",
+            title: "正文",
+            volumeTitle: "",
+            paragraphs: beforeFirstHeading,
+        }];
+    }
+
+    return sections;
 }

@@ -75,7 +75,7 @@ function BookForm({
             <button
                 className="download-button"
                 type="button"
-                diabled={!canDownload}
+                disabled={!canDownload}
                 onClick={onDownload}
             >
                 下载EPUB

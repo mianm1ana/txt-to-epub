@@ -1,23 +1,26 @@
-function ChapterList({ chapters, selectedIndex, onSelect}) {
+function ChapterList({ sections, selectedIndex, onSelect }) {
     return (
         <aside className="chapter-list">
             <h2>章节目录</h2>
 
-            {chapters.length === 0 ? (
+            {sections.length === 0 ? (
                 <p>选择TXT后显示章节</p>
             ): (
-                chapters.map((chapter, index)=> (
+                sections.map((section, index) => (
                     <button
-                        key={`${chapter.title}-${index}`}
+                        key={`${section.type}-${section.title}-${index}`}
                         type="button"
-                        className={
-                            index === selectedIndex
-                            ? "chapter-button active"
-                            : "chapter-button"
-                        }
+                        className={[
+                            "chapter-button",
+                            `chapter-button--${section.type}`,
+                            section.type === "chapter" && section.volumeTitle
+                                ? "chapter-button--nested"
+                                : "",
+                            index === selectedIndex ? "active" : "",
+                        ].filter(Boolean).join(" ")}
                         onClick={() => onSelect(index)}
                     >
-                        {chapter.title}
+                        {section.title}
                     </button>
                 ))
             )}

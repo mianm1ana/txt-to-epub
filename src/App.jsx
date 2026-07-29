@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { createEpub } from "./utils/epub"
-import { decodeTxtFile, parseChapters } from "./utils/text";
+import { decodeTxtFile, parseBookSections } from "./utils/text";
 import { downloadBlob, safeFilename } from "./utils/download"
 
 import ChapterList from "./components/ChapterList"
@@ -18,8 +18,8 @@ function App() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [encoding, setEncoding] = useState("auto"); // 文本编码：auto / utf-8 / gb18030
-  const [chapters, setChapters] = useState([]); // 解析出来的全部章节
-  const [selectedChapterIndex, setSelectedChapterIndex] = useState(0); // 当前查看的是第几章
+  const [sections, setSections] = useState([]); // 解析出来的简介、卷和章节
+  const [selectedSectionIndex, setSelectedSectionIndex] = useState(0); // 当前查看的是哪一项
   const [epubBlob, setEpubBlob] = useState(null); // 生成好的 EPUB 文件
   const [status, setStatus] = useState(""); // 底部状态提示文案
   const [converting, setConverting] = useState(false); // 是否正在生成 EPUB（用来禁用按钮、显示“正在转换...”）
@@ -45,12 +45,18 @@ function App() {
     );
 
     // 顺便用同样的规则拆一遍章节,给用户看识别结果
-    const parsedChapters = parseChapters(decodedText);
+    const parsedSections = parseBookSections(decodedText);
+    const volumeCount = parsedSections.filter(
+      (section) => section.type === "volume",
+    ).length;
+    const chapterCount = parsedSections.filter(
+      (section) => section.type === "chapter",
+    ).length;
 
-    setChapters(parsedChapters);
-    setSelectedChapterIndex(0); // 选中第一章
+    setSections(parsedSections);
+    setSelectedSectionIndex(0); // 选中简介或第一章
     setEpubBlob(null); // 重新选文件后,清空之前生成的EPUB Blob
-    setStatus(`已读取,识别到 ${parsedChapters.length} 章`);
+    setStatus(`已读取，识别到 ${volumeCount} 卷、${chapterCount} 章`);
   }
 
   /**
@@ -107,7 +113,7 @@ function App() {
   async function handleGenerate(event) {
     event.preventDefault(); // 阻止表单默认提交行为
 
-    if (!file || chapters.length === 0) {
+    if (!file || sections.length === 0) {
       setStatus("请先选择TXT文件");
       return;
     }
@@ -122,14 +128,14 @@ function App() {
         title.trim() || file.name.replace(/\.txt$/i, "");
       
       // 核心: 生成EPUB Blob + 章节数
-      const { blob, chapterCount } = await createEpub({
+      const { blob, chapterCount, volumeCount } = await createEpub({
         title: bookTitle,
         author: author.trim() || "未知作者",
-        chapters,
+        sections,
       });
 
       setEpubBlob(blob); // 保存生成的EPUB Blob对象,方便预览或下载
-      setStatus(`EPUB生成成功,共 ${chapterCount} 章节`);
+      setStatus(`EPUB 生成成功，共 ${volumeCount} 卷、${chapterCount} 章`);
     }catch (error) {
       console.error(error);
       setStatus(`生成EPUB失败: ${error.message}`);
@@ -156,7 +162,7 @@ function App() {
     )
   }
 
-  const selectedChapter = chapters[selectedChapterIndex];
+  const selectedSection = sections[selectedSectionIndex];
 
   // --- 界面 ---
   return (
@@ -173,7 +179,7 @@ function App() {
           author={author}
           encoding={encoding}
           converting={converting}
-          canGenerate={chapters.length > 0}
+          canGenerate={sections.length > 0}
           canDownload={Boolean(epubBlob)}
           status={status}
           onFileChange={handleFileChange}
@@ -186,11 +192,11 @@ function App() {
         
         <section className="chapter-workspace">
           <ChapterList
-            chapters={chapters}
-            selectedIndex={selectedChapterIndex}
-            onSelect={setSelectedChapterIndex}
+            sections={sections}
+            selectedIndex={selectedSectionIndex}
+            onSelect={setSelectedSectionIndex}
           />
-          <ChapterPreview chapter={selectedChapter} />
+          <ChapterPreview section={selectedSection} />
         </section>
       </div>
     </main>

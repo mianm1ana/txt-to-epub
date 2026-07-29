@@ -155,6 +155,7 @@
 }
 
 .chapter-list h2,
+.chapter-preview h1,
 .chapter-preview h2 {
   margin: 0;
   color: #202124;
@@ -205,6 +206,22 @@
   font-weight: 600;
 }
 
+.chapter-button--intro {
+  color: #5f6368;
+  font-style: italic;
+}
+
+.chapter-button--volume {
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+.chapter-button--nested {
+  width: calc(100% - 14px);
+  margin-left: 14px;
+  font-size: 14px;
+}
+
 .chapter-preview {
   padding: 22px 26px;
   overflow-y: auto;
@@ -214,11 +231,17 @@
   color: #687078;
 }
 
+.chapter-preview h1,
 .chapter-preview h2 {
   padding-bottom: 14px;
   border-bottom: 1px solid #e5e8ec;
   margin-bottom: 20px;
   text-align: center;
+}
+
+.chapter-preview h1 {
+  padding-top: 12vh;
+  font-size: 28px;
 }
 
 .chapter-content {

@@ -1,12 +1,14 @@
-function ChapterPreview({chapter}) {
+function ChapterPreview({ section }) {
+    const Heading = section?.type === "volume" ? "h1" : "h2";
+
     return (
         <section className="chapter-preview">
-            {chapter ? (
+            {section ? (
                 <>
-                    <h2>{chapter.title}</h2>
+                    <Heading>{section.title}</Heading>
 
                     <div className="chapter-content">
-                        {chapter.paragraphs.map((paragraph, index) => (
+                        {section.paragraphs.map((paragraph, index) => (
                             <p key={index}>{paragraph}</p>
                         ))}
                     </div>

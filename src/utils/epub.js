@@ -18,17 +18,18 @@ function escapeXml(value = "") {
 }
 
 /**
- * 把单个章节转成EPUB需要的XHTML文件内容
- * @param {{title: string, paragraphs: string[]}} chapter
- * @param {number} index - 章节序号（从 0 开始）
+ * 把简介、卷或章转成 EPUB 需要的 XHTML 文件内容。
+ * 卷使用 h1，简介和章使用 h2。
+ * @param {{type: string, title: string, paragraphs: string[]}} section
+ * @param {number} index - 内容序号（从 0 开始）
  */
-function createChapterXhtml(chapter, index) {
-    //把每个段落包成<p>,并做好XML转义
-    const paragraphs = chapter.paragraphs
+function createSectionXhtml(section, index) {
+    const paragraphs = section.paragraphs
         .map((paragraph) => `<p>${escapeXml(paragraph)}</p>`)
         .join("\n");
-    
-    // 返回完整的 XHTML 文档字符串
+
+    const headingTag = section.type === "volume" ? "h1" : "h2";
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html
@@ -38,12 +39,12 @@ function createChapterXhtml(chapter, index) {
 >
   <head>
     <meta charset="UTF-8"/>
-    <title>${escapeXml(chapter.title)}</title>
+    <title>${escapeXml(section.title)}</title>
     <link rel="stylesheet" type="text/css" href="style.css"/>
   </head>
   <body>
-    <section id="chapter-${index + 1}">
-      <h1>${escapeXml(chapter.title)}</h1>
+    <section id="section-${index + 1}">
+      <${headingTag}>${escapeXml(section.title)}</${headingTag}>
       ${paragraphs}
     </section>
   </body>
@@ -51,12 +52,68 @@ function createChapterXhtml(chapter, index) {
 }
 
 /**
+ * 生成 EPUB 导航目录。
+ * 简介和无卷章节在顶层；卷在顶层，其章节放在内部 ol 中。
+ */
+function createNavigationItems(sections) {
+    const groups = [];
+    let currentVolumeGroup = null;
+
+    sections.forEach((section, index) => {
+        const entry = {
+            section,
+            fileName: `section-${index + 1}.xhtml`,
+        };
+
+        if (section.type === "volume") {
+            currentVolumeGroup = {
+                volume: entry,
+                chapters: [],
+            };
+            groups.push(currentVolumeGroup);
+            return;
+        }
+
+        const belongsToCurrentVolume =
+            section.type === "chapter" &&
+            section.volumeTitle &&
+            currentVolumeGroup?.volume.section.title === section.volumeTitle;
+
+        if (belongsToCurrentVolume) {
+            currentVolumeGroup.chapters.push(entry);
+            return;
+        }
+
+        groups.push({ standalone: entry });
+    });
+
+    return groups.map((group) => {
+        if (group.standalone) {
+            const { section, fileName } = group.standalone;
+            return `<li><a href="${fileName}">${escapeXml(section.title)}</a></li>`;
+        }
+
+        const { section, fileName } = group.volume;
+        const nestedChapters = group.chapters
+            .map((chapter) => (
+                `<li><a href="${chapter.fileName}">${escapeXml(chapter.section.title)}</a></li>`
+            ))
+            .join("\n");
+        const nestedList = nestedChapters
+            ? `<ol>\n${nestedChapters}\n</ol>`
+            : "";
+
+        return `<li><a href="${fileName}">${escapeXml(section.title)}</a>${nestedList}</li>`;
+    });
+}
+
+/**
  * 核心函数: 根据书名,作者,全文生成标准EPUB文件
  */
-export async function createEpub({ title, author, chapters}) {
+export async function createEpub({ title, author, sections }) {
     const zip = new JSZip(); // EPUB 本质就是一个特殊结构的ZIP
 
-    if (chapters.length === 0) {
+    if (sections.length === 0) {
         throw new Error("TXT 文件没有可转换的内容");
     }
 
@@ -105,9 +162,15 @@ export async function createEpub({ title, author, chapters}) {
     }
 
     h1 {
+    font-size: 2em;
+    text-align: center;
+    margin: 25% 0 0;
+    }
+
+    h2 {
     font-size: 1.5em;
     text-align: center;
-    margin-bottom: 2em;
+    margin: 0 0 2em;
     }
 
     p {
@@ -119,18 +182,18 @@ export async function createEpub({ title, author, chapters}) {
     // 后面用来拼 content.opf 和目录的数组
     const manifestItems = []; // 清单:所有文件列表
     const spineItems = []; //阅读顺序
-    const navigationItems = []; // 目录里的链接
+    const navigationItems = createNavigationItems(sections); // 目录里的链接
 
-    // === 4. 为每一章生成一个 .xhtml 文件 ===
-    chapters.forEach((chapter, index) => {
+    // === 4. 为简介、卷和章分别生成 .xhtml 文件 ===
+    sections.forEach((section, index) => {
         const number = index + 1;
-        const id = `chapter-${number}`;
+        const id = `section-${number}`;
         const fileName = `${id}.xhtml`;
 
-        // 写入章节文件
+        // 写入内容文件
         zip.file(
         `OEBPS/${fileName}`,
-        createChapterXhtml(chapter, index)
+        createSectionXhtml(section, index)
         );
 
         // 加入清单
@@ -141,10 +204,6 @@ export async function createEpub({ title, author, chapters}) {
         // 加入阅读顺序
         spineItems.push(`<itemref idref="${id}"/>`);
 
-        // 加入目录
-        navigationItems.push(
-        `<li><a href="${fileName}">${escapeXml(chapter.title)}</a></li>`
-        );
     });
 
     // === 5. 目录文件 nav.xhtml (EPUB3 标准目录) ===
@@ -227,6 +286,11 @@ export async function createEpub({ title, author, chapters}) {
     //返回生成的文件和章节数量,方便UI展示
     return {
         blob,
-        chapterCount: chapters.length,
+        chapterCount: sections.filter(
+            (section) => section.type === "chapter"
+        ).length,
+        volumeCount: sections.filter(
+            (section) => section.type === "volume"
+        ).length,
     };
 }

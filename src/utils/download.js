@@ -21,8 +21,7 @@ export function downloadBlob(blob, filename) {
     link.remove();
 
     setTimeout(() => {
-        URL.revokeObjectURL(downloadurl);
+        URL.revokeObjectURL(downloadUrl);
     }, 1000);
 }
-
 
