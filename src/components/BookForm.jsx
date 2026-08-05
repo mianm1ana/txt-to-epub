@@ -21,6 +21,7 @@ function BookForm({
                 <input
                     type="file"
                     accept=".txt,text/plain"
+                    disabled={converting}
                     onChange={onFileChange}
                 />
             </label>
@@ -30,6 +31,7 @@ function BookForm({
 
                 <select
                     value={encoding}
+                    disabled={converting}
                     onChange={onEncodingChange}
                 >
                     <option value="auto">自动检测</option>
@@ -69,13 +71,13 @@ function BookForm({
                 type="submit"
                 disabled={converting || !canGenerate}
             >
-                {converting ? "正在生成...":"生成EPUB"}
+                {converting ? "正在解析并生成..." : "生成EPUB"}
             </button>
 
             <button
                 className="download-button"
                 type="button"
-                disabled={!canDownload}
+                disabled={converting || !canDownload}
                 onClick={onDownload}
             >
                 下载EPUB
@@ -86,6 +88,6 @@ function BookForm({
             </div>
         </form>
     );
-}
+}localStorage
 
 export default BookForm;

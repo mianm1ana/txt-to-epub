@@ -25,84 +25,52 @@ function App() {
   const [converting, setConverting] = useState(false); // 是否正在生成 EPUB（用来禁用按钮、显示“正在转换...”）
 
   /**
-   *  读取并解码用户选择的TXT文件
-   *  同时做校验,更新text状态,统计章节数
-   */
-  async function readSelectedFile(selectedFile,selectedEncoding) {
-    if (!selectedFile) {
-      return;
-    }
-
-    // 只允许.txt
-    if (!selectedFile.name.toLowerCase().endsWith(".txt")) {
-      throw new Error("请选择 .txt 文件");
-    }
-
-    // 调用工具函数: 按指定/自动编码解码成字符串
-    const decodedText = await decodeTxtFile(
-      selectedFile,
-      selectedEncoding
-    );
-
-    // 顺便用同样的规则拆一遍章节,给用户看识别结果
-    const parsedSections = parseBookSections(decodedText);
-    const volumeCount = parsedSections.filter(
-      (section) => section.type === "volume",
-    ).length;
-    const chapterCount = parsedSections.filter(
-      (section) => section.type === "chapter",
-    ).length;
-
-    setSections(parsedSections);
-    setSelectedSectionIndex(0); // 选中简介或第一章
-    setEpubBlob(null); // 重新选文件后,清空之前生成的EPUB Blob
-    setStatus(`已读取，识别到 ${volumeCount} 卷、${chapterCount} 章`);
-  }
-
-  /**
    * 文件选择框变化时触发
    * 1. 保存File
    * 2. 如果书名还是空的,用文件名(去掉.txt)当默认书名
-   * 3. 立刻读取并解码
+   * 3. 清空旧结果，等待用户点击“生成 EPUB”
    */
-  async function handleFileChange(event) {
+  function handleFileChange(event) {
     const selectedFile = event.target.files?.[0];
 
     if (!selectedFile) {
       return;
     }
 
+    if (!selectedFile.name.toLowerCase().endsWith(".txt")) {
+      setFile(null);
+      setSections([]);
+      setEpubBlob(null);
+      setStatus("请选择 .txt 文件");
+      return;
+    }
+
     setFile(selectedFile);
+    setSections([]);
+    setSelectedSectionIndex(0);
+    setEpubBlob(null);
 
     // 如果书名还是空的,自动用文件名填充
     if (!title) {
       setTitle(selectedFile.name.replace(/\.txt$/i, ""));
     }
 
-    try {
-      await readSelectedFile(selectedFile, encoding);
-    } catch (error) {
-      setStatus(error.message);
-    }
+    setStatus(`已选择 ${selectedFile.name}，点击“生成 EPUB”开始解析`);
   }
 
   /**
    * 编码下拉框变化时触发
-   * 如果已经选过文件,就用新编码重新解码一遍
+   * 如果已经选过文件，只让旧解析结果失效，不自动重新解析
    */
-
-  async function handleEncodingChange(event) {
+  function handleEncodingChange(event) {
     const nextEncoding = event.target.value;
     setEncoding(nextEncoding);
 
-    if (!file) {
-      return;// 还没选文件就只改状态,不读盘
-    }
-
-    try{
-      await readSelectedFile(file, nextEncoding)
-    }catch (error) {
-      setStatus(error.message);
+    if (file) {
+      setSections([]);
+      setSelectedSectionIndex(0);
+      setEpubBlob(null);
+      setStatus("文本编码已更改，点击“生成 EPUB”重新解析");
     }
   }
 
@@ -113,16 +81,26 @@ function App() {
   async function handleGenerate(event) {
     event.preventDefault(); // 阻止表单默认提交行为
 
-    if (!file || sections.length === 0) {
+    if (!file) {
       setStatus("请先选择TXT文件");
       return;
     }
 
     setConverting(true);
     setEpubBlob(null);
-    setStatus("正在生成EPUB...");
+    setStatus("正在解析 TXT 并生成 EPUB...");
 
     try {
+      const decodedText = await decodeTxtFile(file, encoding);
+      const parsedSections = parseBookSections(decodedText);
+
+      if (parsedSections.length === 0) {
+        throw new Error("TXT 文件没有可转换的内容");
+      }
+
+      setSections(parsedSections);
+      setSelectedSectionIndex(0);
+
       // 书名兜底: 没填就用文件名
       const bookTitle =
         title.trim() || file.name.replace(/\.txt$/i, "");
@@ -131,7 +109,7 @@ function App() {
       const { blob, chapterCount, volumeCount } = await createEpub({
         title: bookTitle,
         author: author.trim() || "未知作者",
-        sections,
+        sections: parsedSections,
       });
 
       setEpubBlob(blob); // 保存生成的EPUB Blob对象,方便预览或下载
@@ -179,7 +157,7 @@ function App() {
           author={author}
           encoding={encoding}
           converting={converting}
-          canGenerate={sections.length > 0}
+          canGenerate={Boolean(file)}
           canDownload={Boolean(epubBlob)}
           status={status}
           onFileChange={handleFileChange}

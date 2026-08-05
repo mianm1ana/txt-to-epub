@@ -51,11 +51,63 @@ export function parseBookSections(text) {
         .split("\n");
 
     const chineseNumber = "一二三四五六七八九十百千万零〇两0-9";
-    const volumePattern = new RegExp(`^第[${chineseNumber}]+卷.*$`);
-    const chapterPattern = new RegExp(
-        `^(第[${chineseNumber}]+[章节回篇].*|Chapter\\s+\\d+.*|序章.*|楔子.*|前言.*|后记.*|尾声.*)$`,
+    const volumeCore = `第[${chineseNumber}]+[卷部]`;
+    const extraChapterCore = `(?:番外(?:篇[${chineseNumber}]*|[${chineseNumber}]+)?|完本感言)`;
+    const chapterCore = `(?:第[${chineseNumber}]+[章节回篇]|Chapter\\s+\\d+|序章|楔子|前言|后记|尾声|${extraChapterCore})`;
+    const maximumHeadingLength = 80;
+
+    // 带括号的标题格式很明确，不要求前后必须有空行。
+    const decoratedVolumePattern = new RegExp(
+        `^[【\\[［《]\\s*${volumeCore}[^】\\]］》]*[】\\]］》]$`,
         "i",
     );
+    const decoratedChapterPattern = new RegExp(
+        `^[【\\[［《]\\s*${chapterCore}[^】\\]］》]*[】\\]］》]$`,
+        "i",
+    );
+
+    const exactVolumePattern = new RegExp(`^${volumeCore}$`, "i");
+    const colonVolumePattern = new RegExp(`^${volumeCore}[：:]\\s*\\S.*$`, "i");
+    const spacedVolumePattern = new RegExp(`^${volumeCore}\\s+\\S.*$`, "i");
+    const exactChapterPattern = new RegExp(`^${chapterCore}$`, "i");
+    const colonChapterPattern = new RegExp(`^${chapterCore}[：:]\\s*\\S.*$`, "i");
+    const spacedChapterPattern = new RegExp(`^${chapterCore}\\s+\\S.*$`, "i");
+
+    function isLikelyHeading(line, type) {
+        if (line.length > maximumHeadingLength) {
+            return false;
+        }
+
+        const patterns = type === "volume"
+            ? {
+                decorated: decoratedVolumePattern,
+                exact: exactVolumePattern,
+                colon: colonVolumePattern,
+                spaced: spacedVolumePattern,
+            }
+            : {
+                decorated: decoratedChapterPattern,
+                exact: exactChapterPattern,
+                colon: colonChapterPattern,
+                spaced: spacedChapterPattern,
+            };
+
+        if (patterns.decorated.test(line)) {
+            return true;
+        }
+
+        // 普通正文句子常带句号或分号，不应被当作标题。
+        if (/[。；;]/.test(line)) {
+            return false;
+        }
+
+        if (patterns.exact.test(line) || patterns.colon.test(line)) {
+            return true;
+        }
+
+        // 空格本身也是标题编号和标题正文之间的明确分隔符。
+        return patterns.spaced.test(line);
+    }
 
     /** @type {BookSection[]} */
     const sections = [];
@@ -79,14 +131,14 @@ export function parseBookSections(text) {
         beforeFirstHeading.length = 0;
     }
 
-    for (const originalLine of lines) {
-        const line = originalLine.trim();
+    for (let index = 0; index < lines.length; index += 1) {
+        const line = lines[index].trim();
 
         if (!line) {
             continue;
         }
 
-        if (volumePattern.test(line)) {
+        if (isLikelyHeading(line, "volume")) {
             if (!foundHeading) {
                 addIntroIfNeeded();
             }
@@ -103,7 +155,7 @@ export function parseBookSections(text) {
             continue;
         }
 
-        if (chapterPattern.test(line)) {
+        if (isLikelyHeading(line, "chapter")) {
             if (!foundHeading) {
                 addIntroIfNeeded();
             }

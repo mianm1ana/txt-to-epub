@@ -19,11 +19,30 @@
 6. 普通文字加入当前 section。
 7. 若从未发现结构标题，将全部文字作为“正文”章节。
 
+## Heading Recognition
+
+- 带 `【】`、`[]`、`［］`、`《》` 的卷章标题视为强格式标题。
+- `第X卷` 与 `第X部` 使用相同的 volume 类型和识别边界。
+- 裸标题支持 `第一卷`、`第一卷：标题`、`第一卷 标题`。
+- 裸标题必须在编号后结束，或使用空格/冒号分隔标题正文。
+- `第五卷中提到了……` 因卷字后没有标题分隔符，不识别为卷。
+- 番外和完本感言归类为 chapter，并复用章节标题与 EPUB 导航逻辑。
+- 标题长度限制为 80 字，并拒绝含句号或分号的候选行。
+
 ## Rendering Rules
 
 - volume：`h1`
 - intro/chapter：`h2`
 - 导航：简介和无卷章节为顶层项；卷为顶层项，所属章节放在内部 `ol`。
+- 卷标题增加 `volume-title` class；章节标题增加 `head` class，并在可拆分时用 span 包裹章节编号。
+
+## Parse And Generate Flow
+
+1. `handleFileChange` 只保存文件、设置默认书名并清空旧结果。
+2. `handleEncodingChange` 只更新编码并清空旧结果。
+3. `handleGenerate` 先解码并调用 `parseBookSections`，把结果显示到页面。
+4. 同一次 `handleGenerate` 使用刚解析的 sections 生成 EPUB Blob。
+5. 没有文件时禁用“生成 EPUB”；没有 Blob 时禁用下载。
 
 ## Error Handling And Edge Cases
 

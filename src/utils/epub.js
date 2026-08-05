@@ -18,6 +18,36 @@ function escapeXml(value = "") {
 }
 
 /**
+ * 根据内容类型生成标题。
+ * 章节标题可拆成“章节编号 + 标题”，用于红色编号样式。
+ */
+function createSectionHeading(section) {
+    if (section.type === "volume") {
+        return `<h1 class="volume-title">${escapeXml(section.title)}</h1>`;
+    }
+
+    if (section.type === "chapter") {
+        const chapterTitlePattern = /^(第[一二三四五六七八九十百千万零〇两0-9]+[章节回篇]|Chapter\s+\d+)\s*(.*)$/i;
+        const specialChapterTitlePattern = /^(序章|楔子|前言|后记|尾声|番外(?:篇[一二三四五六七八九十百千万零〇两0-9]*|[一二三四五六七八九十百千万零〇两0-9]+)?|完本感言)(?:[：:]\s*|\s+)?(.*)$/i;
+        const match =
+            section.title.match(chapterTitlePattern) ||
+            section.title.match(specialChapterTitlePattern);
+
+        if (match) {
+            const chapterNumber = escapeXml(match[1]);
+            const subtitle = escapeXml(match[2].trim());
+            const subtitleHtml = subtitle ? `<br/>${subtitle}` : "";
+
+            return `<h2 class="head"><span>${chapterNumber}</span>${subtitleHtml}</h2>`;
+        }
+
+        return `<h2 class="head">${escapeXml(section.title)}</h2>`;
+    }
+
+    return `<h2>${escapeXml(section.title)}</h2>`;
+}
+
+/**
  * 把简介、卷或章转成 EPUB 需要的 XHTML 文件内容。
  * 卷使用 h1，简介和章使用 h2。
  * @param {{type: string, title: string, paragraphs: string[]}} section
@@ -28,7 +58,7 @@ function createSectionXhtml(section, index) {
         .map((paragraph) => `<p>${escapeXml(paragraph)}</p>`)
         .join("\n");
 
-    const headingTag = section.type === "volume" ? "h1" : "h2";
+    const heading = createSectionHeading(section);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
@@ -44,7 +74,7 @@ function createSectionXhtml(section, index) {
   </head>
   <body>
     <section id="section-${index + 1}">
-      <${headingTag}>${escapeXml(section.title)}</${headingTag}>
+      ${heading}
       ${paragraphs}
     </section>
   </body>
@@ -155,28 +185,179 @@ export async function createEpub({ title, author, sections }) {
     // === 3. 样式表 ===
     zip.file(
         "OEBPS/style.css",
-        `body {
-    font-family: serif;
+        `/* =========================
+   全局
+   Kindle / 手机友好
+   ========================= */
+
+body {
     line-height: 1.8;
-    margin: 5%;
-    }
+    text-align: justify;
+}
 
-    h1 {
-    font-size: 2em;
-    text-align: center;
-    margin: 25% 0 0;
-    }
 
-    h2 {
-    font-size: 1.5em;
-    text-align: center;
-    margin: 0 0 2em;
-    }
+/* =========================
+   正文排版
+   ========================= */
 
-    p {
-    margin: 0.5em 0;
+p {
     text-indent: 2em;
-    }`
+    line-height: 1.8;
+    margin: 0.8em 0;
+}
+
+
+/* =========================
+   图片
+   ========================= */
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 1.5em auto;
+    border-radius: 6px;
+}
+
+
+/* =========================
+   普通章节标题
+   ========================= */
+
+h1 {
+    font-size: 1.5em;
+    line-height: 1.2;
+
+    text-align: center;
+    text-indent: 0;
+
+    font-weight: bold;
+
+    margin: 1em 0;
+}
+
+
+/* =========================
+   卷标题
+   第一卷 风起
+   ========================= */
+
+h1.volume-title {
+    margin: 25% 0 2.5em;
+    padding: 1.2em 0.5em;
+
+    font-size: 1.8em;
+    line-height: 1.5;
+    letter-spacing: 0.2em;
+
+    text-align: center;
+    text-indent: 0;
+    font-weight: bold;
+
+    color: #3f3327;
+
+    border-top: 1px solid #b9a58c;
+    border-bottom: 1px solid #b9a58c;
+
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+
+/* =========================
+   章节标题
+   第1章
+   宋氏【修】
+   ========================= */
+
+h2 {
+    margin: 2em 0 2em;
+
+    text-align: center;
+    text-indent: 0;
+
+    font-size: 1.4em;
+    font-weight: bold;
+
+    color: #333;
+
+    letter-spacing: 0.15em;
+
+    line-height: 1.5;
+
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+
+/* 红色章节编号 */
+
+h2.head span {
+    display: inline-block;
+
+    padding: 0.15em 0.6em;
+
+    margin-bottom: 0.8em;
+
+    color: #fff;
+
+    background-color: #8b3a3a;
+
+    font-size: 0.7em;
+
+    font-weight: normal;
+
+    line-height: 1.5;
+}
+
+
+/* =========================
+   对话
+   ========================= */
+
+.dialogue {
+    color: #405a66;
+}
+
+
+/* =========================
+   引用
+   ========================= */
+
+blockquote {
+    margin: 1em 0;
+
+    padding-left: 1em;
+
+    color: #666;
+
+    border-left: 3px solid #ccc;
+}
+
+
+/* =========================
+   强调
+   ========================= */
+
+strong {
+    font-weight: bold;
+    color: #222;
+}
+
+
+/* =========================
+   分隔符
+   ========================= */
+
+hr {
+    width: 30%;
+
+    margin: 2em auto;
+
+    border: none;
+
+    border-top: 1px solid #ccc;
+}`
     );
     
     // 后面用来拼 content.opf 和目录的数组
