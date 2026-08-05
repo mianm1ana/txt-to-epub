@@ -1,16 +1,94 @@
-# React + Vite
+# TXT to EPUB
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个在浏览器中将小说 TXT 文件转换为 EPUB 电子书的小工具。
 
-Currently, two official plugins are available:
+当前版本为早期 `0.1.0`：适合转换结构较清晰的中文小说 TXT，并在下载前预览自动识别出的简介、卷和章节。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 功能
 
-## React Compiler
+- 支持 UTF-8、GBK / GB18030 文本，可自动尝试识别编码。
+- 自动填写文件名作为书名，也可以手动设置书名和作者。
+- 自动识别简介、卷和章节，并在网页中显示目录与正文预览。
+- 支持常见标题格式，包括：
+  - `第一卷`、`第一部` 及带标题的卷名；
+  - `第一章`、`第一节`、`第一回`、`第一篇`；
+  - `Chapter 1`；
+  - `序章`、`楔子`、`前言`、`后记`、`尾声`；
+  - `番外`、`番外篇`、带序号的番外及`完本感言`。
+- 在 EPUB 导航目录中保留“卷—章”层级。
+- 生成 EPUB 3 文件并直接下载到本地。
+- 没有可识别标题的 TXT 会作为单个“正文”章节处理。
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 使用方式
 
-## Expanding the ESLint configuration
+1. 打开网页并选择一个 `.txt` 文件。
+2. 保持“自动检测”，或手动选择 TXT 的文本编码。
+3. 确认书名和作者。
+4. 点击“生成 EPUB”。
+5. 查看识别出的目录和章节预览。
+6. 点击“下载 EPUB”保存电子书。
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+如果正文乱码，请切换 UTF-8 或 GBK / GB18030 后重新生成。自动识别主要在这两类编码之间判断。
+
+## 隐私说明
+
+TXT 的读取、章节解析、EPUB 生成和文件下载都在当前浏览器中完成。项目目前没有上传文件的接口，也不需要将书籍内容发送到应用服务器。
+
+和访问其他静态网站一样，托管平台仍可能记录常规访问数据，例如 IP 地址、请求时间、浏览器信息和网页资源请求；这些请求不包含所选择 TXT 的正文内容。
+
+## 本地开发
+
+需要 Node.js 20 或更高版本，以及 npm。
+
+安装依赖：
+
+```bash
+npm install
+```
+
+启动开发服务器：
+
+```bash
+npm run dev
+```
+
+终端会显示本地访问地址，通常为 `http://localhost:5173`。
+
+## 检查与构建
+
+运行代码检查：
+
+```bash
+npm run lint
+```
+
+验证 TXT 解析和 EPUB 结构：
+
+```bash
+npm run verify:book-structure
+```
+
+生成生产构建：
+
+```bash
+npm run build
+```
+
+构建结果位于 `dist` 目录。可以使用以下命令在本地预览：
+
+```bash
+npm run preview
+```
+
+## 技术栈
+
+- React
+- Vite
+- JSZip
+
+## 当前限制
+
+- 章节划分依赖标题格式，排版特殊的 TXT 可能需要先整理标题。
+- 当前不能在网页中手动拆分、合并、重命名或拖动章节。
+- 文件在浏览器内存中处理，特别大的 TXT 会受到设备内存和浏览器性能限制。
+- 当前不支持封面、插图和自定义 EPUB 样式。

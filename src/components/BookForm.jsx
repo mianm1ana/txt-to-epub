@@ -88,6 +88,6 @@ function BookForm({
             </div>
         </form>
     );
-}localStorage
+}
 
 export default BookForm;
