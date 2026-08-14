@@ -121,6 +121,32 @@ assert.deepEqual(
 );
 assert.ok(extraChapters.every((section) => section.type === "chapter"));
 
+const repeatedChapterHeading = parseBookSections(`第642章 四强，七情的女儿
+　　第642章 四强，七情的女儿
+这是第642章的正文。
+
+第643章 继续
+这是第643章的正文。`);
+
+assert.deepEqual(
+    repeatedChapterHeading.map((section) => section.title),
+    ["第642章 四强，七情的女儿", "第643章 继续"],
+);
+assert.deepEqual(
+    repeatedChapterHeading[0].paragraphs,
+    ["这是第642章的正文。"],
+);
+
+// 已经出现正文后再次遇到同名标题，仍应保留为独立章节。
+const separatedSameTitle = parseBookSections(`第一章 重逢
+第一段正文
+第一章 重逢
+第二段正文`);
+
+assert.equal(separatedSameTitle.length, 2);
+assert.deepEqual(separatedSameTitle[0].paragraphs, ["第一段正文"]);
+assert.deepEqual(separatedSameTitle[1].paragraphs, ["第二段正文"]);
+
 const { blob: extraChapterBlob } = await createEpub({
     title: "番外测试",
     author: "测试作者",

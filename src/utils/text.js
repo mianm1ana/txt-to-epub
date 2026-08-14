@@ -117,6 +117,20 @@ export function parseBookSections(text) {
     let currentVolumeTitle = "";
     let foundHeading = false;
 
+    function normalizeHeading(title) {
+        return title
+            .normalize("NFKC")
+            .replace(/\s+/g, " ")
+            .trim()
+            .toLocaleLowerCase();
+    }
+
+    function isRepeatedEmptyHeading(type, title) {
+        return currentSection?.type === type
+            && currentSection.paragraphs.length === 0
+            && normalizeHeading(currentSection.title) === normalizeHeading(title);
+    }
+
     function addIntroIfNeeded() {
         if (beforeFirstHeading.length === 0) {
             return;
@@ -144,6 +158,13 @@ export function parseBookSections(text) {
             }
 
             foundHeading = true;
+
+            // 部分 TXT 会把同一个标题连续保存两次。此时保留第一条，
+            // 但有正文分隔的同名卷仍按两个独立结构处理。
+            if (isRepeatedEmptyHeading("volume", line)) {
+                continue;
+            }
+
             currentVolumeTitle = line;
             currentSection = {
                 type: "volume",
@@ -161,6 +182,13 @@ export function parseBookSections(text) {
             }
 
             foundHeading = true;
+
+            // 只折叠正文开始前连续出现的同名标题，避免误删真正的同名章节。
+            // NFKC 和空白归一化可兼容全角空格、全角数字等常见 TXT 差异。
+            if (isRepeatedEmptyHeading("chapter", line)) {
+                continue;
+            }
+
             currentSection = {
                 type: "chapter",
                 title: line,
