@@ -64,3 +64,6 @@ App 保存 cover/loading/error，读取时禁用封面操作和生成，成功�
 预览使用 object URL，校验失败与替换/移除/卸载时释放。输入每次清空以便重选同一文件。
 createEpub 接受可选 cover，图片写入 OEBPS/images/cover.jpg 或 png；封面页引用固定安全路径，书名经过 XML 转义。
 测试覆盖图片签名/大小、JPEG/PNG 包字节、OPF 元数据和 spine 顺序、导航入口、无封面回归、空内容与非法格式。浏览器检查初始布局与交互。
+
+## 预设实现
+新增 src/presets/classic.js、index.js 及 utils/book-render.js；保留 parseBookSections 默认接口。createEpub 增加可选 presetId，默认 classic-novel，未知 id 报错。共享渲染生成 XHTML，预览仅将外部 style.css 链接替换为同源预设内联样式。示例由 sampleText 经预设 parse 得出并提供简介/卷首/章节切换。PresetPreview 常驻右侧上方，实际章节预览也复用渲染；切换预设清空 sections/Blob。预设为可信内置代码，不允许用户注入脚本。测试检查默认兼容、注册表有效性、示例及实际输出同源和 XML 转义、封面回归。

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "verify:book-structure": "node scripts/verify-book-structure.mjs",
-    "verify:cover": "node scripts/verify-cover.mjs"
+    "verify:cover": "node scripts/verify-cover.mjs",
+    "verify:presets": "node scripts/verify-presets.mjs"
   },
   "dependencies": {
     "jszip": "^3.10.1",

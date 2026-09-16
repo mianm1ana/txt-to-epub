@@ -1,4 +1,9 @@
+import { PRESETS, getPreset } from "../presets/index.js";
+
 function BookForm({
+    fileName,
+    presetId,
+    onPresetChange,
     cover,
     coverLoading,
     coverError,
@@ -20,12 +25,24 @@ function BookForm({
 }) {
     return (
         <form className="form" onSubmit={onGenerate}>
-            <label className="field">
+            <div className="form-section-heading"><span className="section-number">01</span><div><h2>装订之前</h2><p>MAKE IT YOURS</p></div></div>
+            <div>
+                <label className="field">
+                    <span>生成预设</span>
+                    <select value={presetId} disabled={converting} onChange={(event) => onPresetChange(event.target.value)} aria-describedby="preset-description">
+                        {PRESETS.map((preset) => <option key={preset.id} value={preset.id}>{preset.name}</option>)}
+                    </select>
+                </label>
+                <p className="cover-hint" id="preset-description">{getPreset(presetId).description}</p>
+            </div>
+            <label className="field upload-field">
                 <span>TXT文件</span>
+                <span className="upload-prompt"><i className="fa-solid fa-arrow-up-from-bracket" aria-hidden="true" /><strong>{fileName || "选择你的原稿"}</strong><small>{fileName ? "点击更换 TXT 文件" : "TXT 格式 · 点击选择文件"}</small></span>
 
                 <input
                     type="file"
                     accept=".txt,text/plain"
+                    aria-label="TXT文件"
                     disabled={converting}
                     onChange={onFileChange}
                 />
@@ -99,7 +116,7 @@ function BookForm({
                 type="submit"
                 disabled={converting || !canGenerate}
             >
-                {converting ? "正在解析并生成..." : "生成EPUB"}
+                {converting ? "正在解析并生成..." : "生成EPUB"} <i className="fa-solid fa-arrow-right" aria-hidden="true" />
             </button>
 
             <button
@@ -108,7 +125,7 @@ function BookForm({
                 disabled={converting || !canDownload}
                 onClick={onDownload}
             >
-                下载EPUB
+                <i className="fa-solid fa-arrow-down" aria-hidden="true" /> 下载EPUB
             </button>
 
             <div className="status" aria-live="polite">

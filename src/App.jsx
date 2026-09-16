@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { readCover } from "./utils/cover";
 
 import { createEpub } from "./utils/epub"
-import { decodeTxtFile, parseBookSections } from "./utils/text";
+import { decodeTxtFile } from "./utils/text";
 import { downloadBlob, safeFilename } from "./utils/download"
 
 import ChapterList from "./components/ChapterList"
@@ -11,11 +11,14 @@ import ChapterPreview from './components/ChapterPreview';
 import BookForm from './components/BookForm';
 
 import './App.css';
+import { DEFAULT_PRESET_ID, getPreset } from './presets/index.js';
+import PresetPreview from './components/PresetPreview';
 
 
 
 function App() {
   // --- 页面状态 ---
+  const [presetId, setPresetId] = useState(DEFAULT_PRESET_ID);
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -35,6 +38,15 @@ function App() {
       if (cover) URL.revokeObjectURL(cover.previewUrl);
     };
   }, [cover]);
+
+  function handlePresetChange(nextId) {
+    if (nextId === presetId) return;
+    setPresetId(nextId);
+    setSections([]);
+    setSelectedSectionIndex(0);
+    setEpubBlob(null);
+    setStatus("生成预设已更改，请重新生成 EPUB");
+  }
 
   async function handleCoverChange(event) {
     const selected = event.target.files?.[0];
@@ -131,7 +143,7 @@ function App() {
 
     try {
       const decodedText = await decodeTxtFile(file, encoding);
-      const parsedSections = parseBookSections(decodedText);
+      const parsedSections = getPreset(presetId).parse(decodedText);
 
       if (parsedSections.length === 0) {
         throw new Error("TXT 文件没有可转换的内容");
@@ -150,10 +162,11 @@ function App() {
         author: author.trim() || "未知作者",
         sections: parsedSections,
         cover,
+        presetId,
       });
 
       setEpubBlob(blob); // 保存生成的EPUB Blob对象,方便预览或下载
-      setStatus(`EPUB 生成成功，共 ${volumeCount} 卷、${chapterCount} 章`);
+      setStatus(`EPUB 生成成功（${getPreset(presetId).name}），共 ${volumeCount} 卷、${chapterCount} 章`);
     }catch (error) {
       console.error(error);
       setStatus(`生成EPUB失败: ${error.message}`);
@@ -185,14 +198,31 @@ function App() {
   // --- 界面 ---
   return (
     <main className="page">
+      <nav className="masthead" aria-label="品牌信息">
+        <a className="brand" href="#"><i className="fa-solid fa-book-open" aria-hidden="true" /> 纸间 <span> / PAPERWORK</span></a>
+        <span className="local-badge"><span className="live-dot" /> 本地运行 · 文件不上传</span>
+      </nav>
       <header className="header">
-        <h1>TXT to EPUB</h1>
-        <p>所有文件都在当前浏览器中处理,保护隐私</p>
+        <div>
+          <p className="eyebrow">A SMALL WORKSHOP FOR BIG STORIES</p>
+          <h1>让文字，<br />成为<span>一本书。</span></h1>
+          <p className="hero-description">从纯文本到掌中书。整理章节、挑选排版，<br className="desktop-break" />为值得收藏的故事，做一本自己的电子书。</p>
+        </div>
+        <div className="format-mark" aria-label="TXT 转 EPUB">
+          <span className="eyebrow">PLAIN TEXT. WELL DRESSED.</span>
+          <div>TXT <i className="fa-solid fa-arrow-right-long" aria-hidden="true" /></div>
+          <strong>EPUB<span>3.0</span></strong>
+          <p>你的文字，你的书架。</p>
+        </div>
       </header>
+      <div className="workbench-heading"><span><i className="fa-solid fa-sliders" aria-hidden="true" /> 制书工作台</span><span>01 / 配置 &nbsp; → &nbsp; 02 / 预览 &nbsp; → &nbsp; 03 / 导出</span></div>
 
       <div className="workspace">
         {/* 左侧：表单操作区 */}
         <BookForm
+          fileName={file?.name}
+          presetId={presetId}
+          onPresetChange={handlePresetChange}
           title={title}
           author={author}
           encoding={encoding}
@@ -213,15 +243,19 @@ function App() {
           onDownload={handleDownload}
         />
         
-        <section className="chapter-workspace">
-          <ChapterList
-            sections={sections}
-            selectedIndex={selectedSectionIndex}
-            onSelect={setSelectedSectionIndex}
-          />
-          <ChapterPreview section={selectedSection} />
-        </section>
+        <div className="reading-workspace">
+          <PresetPreview key={presetId} presetId={presetId} />
+          <section className="chapter-workspace">
+            <ChapterList
+              sections={sections}
+              selectedIndex={selectedSectionIndex}
+              onSelect={setSelectedSectionIndex}
+            />
+            <ChapterPreview section={selectedSection} presetId={presetId} />
+          </section>
+        </div>
       </div>
+      <footer className="footer"><span>纸间 / PAPERWORK</span><p>好故事，值得好好排版。</p><span>TXT → EPUB · 全程本地处理</span></footer>
     </main>
   );
 }
