@@ -193,8 +193,8 @@ const chapterXhtml = await zip.file("OEBPS/section-3.xhtml").async("string");
 const navigation = await zip.file("OEBPS/nav.xhtml").async("string");
 const stylesheet = await zip.file("OEBPS/style.css").async("string");
 
-assert.match(introXhtml, /<h2>简介<\/h2>/);
-assert.match(volumeXhtml, /<h1 class="volume-title">第一卷 风起<\/h1>/);
+assert.match(introXhtml, /<h2 class="intro-title"><span>简介<\/span><\/h2>/);
+assert.match(volumeXhtml, /<h1 class="volume-title"><span class="volume-number">第一卷<\/span><br\/><span class="volume-name">风起<\/span><\/h1>/);
 assert.match(
     chapterXhtml,
     /<h2 class="head"><span>第一章<\/span><br\/>初见<\/h2>/,
@@ -205,7 +205,7 @@ assert.match(
 );
 assert.match(stylesheet, /body\s*{[\s\S]*text-align:\s*justify;/);
 assert.match(stylesheet, /p\s*{[\s\S]*text-indent:\s*2em;/);
-assert.match(stylesheet, /h1\.volume-title\s*{[\s\S]*border-top:/);
+assert.match(stylesheet, /h1\.volume-title::after\s*{[\s\S]*border-top:/);
 assert.match(stylesheet, /h2\.head span\s*{[\s\S]*background-color:\s*#8b3a3a;/);
 
 console.log("简介、卷、章解析与 EPUB 结构验证通过");

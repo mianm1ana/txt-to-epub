@@ -79,25 +79,88 @@ h1 {
    第一卷 风起
    ========================= */
 
+/* 简介与卷首沿用正文暗红印签，用窄版心和短线区分层级。 */
+.opening {
+    max-width: 32em;
+    margin: 0 auto;
+    padding: 0 1em 2em;
+}
+
 h1.volume-title {
-    margin: 25% 0 2.5em;
-    padding: 1.2em 0.5em;
-
+    margin: 3em 0 1.6em;
+    padding: 0;
     font-size: 1.8em;
-    line-height: 1.5;
-    letter-spacing: 0.2em;
-
+    line-height: 1.7;
+    letter-spacing: 0.15em;
     text-align: center;
     text-indent: 0;
-    font-weight: bold;
-
-    color: #3f3327;
-
-    border-top: 1px solid #b9a58c;
-    border-bottom: 1px solid #b9a58c;
-
+    color: #333;
     page-break-after: avoid;
     break-after: avoid;
+}
+
+.volume-number {
+    display: inline-block;
+    padding: 0.15em 0.6em;
+    margin-bottom: 1.2em;
+    color: #fff;
+    background-color: #8b3a3a;
+    font-size: 0.55em;
+    font-weight: normal;
+    line-height: 1.5;
+}
+
+.volume-name {
+    overflow-wrap: break-word;
+}
+
+h1.volume-title::after {
+    content: "";
+    display: block;
+    width: 2em;
+    margin: 1.2em auto 0;
+    border-top: 1px solid #8b3a3a;
+}
+
+.opening--volume p {
+    max-width: 26em;
+    margin: 1em auto;
+    color: #555;
+    line-height: 1.9;
+}
+
+h2.intro-title {
+    margin: 2.8em 0 2em;
+    font-size: 1.4em;
+}
+
+.intro-title span {
+    display: inline-block;
+    padding: 0.15em 0.6em;
+    color: #fff;
+    background-color: #8b3a3a;
+    font-size: 0.7em;
+    font-weight: normal;
+    line-height: 1.5;
+}
+
+.opening--intro p {
+    line-height: 1.9;
+    margin: 1em 0;
+}
+
+.opening--intro p:first-of-type {
+    border-left: 2px solid #8b3a3a;
+    padding-left: 1em;
+    text-indent: 0;
+}
+
+.opening--intro::after {
+    content: "";
+    display: block;
+    width: 2.8em;
+    margin: 2em auto 0;
+    border-top: 1px solid #8b3a3a;
 }
 
 

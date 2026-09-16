@@ -17,6 +17,12 @@ export function escapeXml(value = "") {
  */
 function createSectionHeading(section) {
     if (section.type === "volume") {
+        const title = section.title.replace(/^[【[［《]\s*(.*?)\s*[】\]］》]$/, "$1");
+        const match = title.match(/^(第[一二三四五六七八九十百千万零〇两0-9]+[卷部])(?:[：:]\s*|\s+)?(.*)$/);
+        if (match) {
+            const subtitle = match[2].trim();
+            return `<h1 class="volume-title"><span class="volume-number">${escapeXml(match[1])}</span>${subtitle ? `<br/><span class="volume-name">${escapeXml(subtitle)}</span>` : ""}</h1>`;
+        }
         return `<h1 class="volume-title">${escapeXml(section.title)}</h1>`;
     }
 
@@ -38,7 +44,7 @@ function createSectionHeading(section) {
         return `<h2 class="head">${escapeXml(section.title)}</h2>`;
     }
 
-    return `<h2>${escapeXml(section.title)}</h2>`;
+    return `<h2 class="intro-title"><span>${escapeXml(section.title)}</span></h2>`;
 }
 
 /**
@@ -67,7 +73,7 @@ export function createSectionXhtml(section, index) {
     <link rel="stylesheet" type="text/css" href="style.css"/>
   </head>
   <body>
-    <section id="section-${index + 1}">
+    <section id="section-${index + 1}"${section.type === "intro" || section.type === "volume" ? ` class="opening opening--${section.type}"` : ""}>
       ${heading}
       ${paragraphs}
     </section>

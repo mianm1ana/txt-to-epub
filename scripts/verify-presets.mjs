@@ -39,3 +39,10 @@ for (const path of ['OEBPS/style.css', 'OEBPS/section-1.xhtml', 'OEBPS/nav.xhtml
 }
 await assert.rejects(createEpub({ title: '测试', sections, presetId: 'missing' }), /找不到生成预设/);
 console.log('预设注册、解析、默认兼容、排版预览与导出一致性验证通过');
+
+for (const [title, number, name] of [['【第一卷：风起】', '第一卷', '风起'], ['第二部 归途', '第二部', '归途'], ['第三卷', '第三卷', '']]) {
+    const html = getPreset().renderSection({ type: 'volume', title, paragraphs: [] }, 0);
+    assert.ok(html.includes(`<span class="volume-number">${number}</span>`));
+    if (name) assert.ok(html.includes(`<span class="volume-name">${name}</span>`));
+    else assert.ok(!html.includes('class="volume-name"'));
+}
