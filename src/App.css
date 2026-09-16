@@ -282,3 +282,11 @@
     min-height: 360px;
   }
 }
+
+.cover-field { min-width: 0; }
+.cover-hint { color: #687078; font-size: 13px; line-height: 1.5; margin: 8px 0 0; }
+.cover-error { color: #b42318; font-size: 14px; }
+.cover-preview { margin-top: 12px; text-align: center; }
+.cover-preview img { display: block; max-width: 100%; max-height: 240px; margin: 0 auto; object-fit: contain; }
+.cover-preview p { overflow-wrap: anywhere; font-size: 13px; color: #687078; }
+.cover-preview button { width: 100%; }

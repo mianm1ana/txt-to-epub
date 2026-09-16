@@ -3,6 +3,7 @@
  */
 
 import JSZip from "jszip";
+import { identifyCover } from "./cover.js";
 
 /**
  * 把文本里的特殊字符转成XML/HTML安全写法
@@ -140,7 +141,7 @@ function createNavigationItems(sections) {
 /**
  * 核心函数: 根据书名,作者,全文生成标准EPUB文件
  */
-export async function createEpub({ title, author, sections }) {
+export async function createEpub({ title, author, sections, cover = null }) {
     const zip = new JSZip(); // EPUB 本质就是一个特殊结构的ZIP
 
     if (sections.length === 0) {
@@ -365,6 +366,22 @@ hr {
     const spineItems = []; //阅读顺序
     const navigationItems = createNavigationItems(sections); // 目录里的链接
 
+    if (cover) {
+        const { mediaType, extension } = identifyCover(cover.data);
+        const imagePath = `images/cover.${extension}`;
+        zip.file(`OEBPS/${imagePath}`, cover.data);
+        zip.file("OEBPS/cover.xhtml", `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="zh-CN" lang="zh-CN">
+<head><meta charset="UTF-8"/><title>${escapeXml(title)} — 封面</title>
+<style>body { margin: 0; padding: 0; text-align: center; } img { max-width: 100%; max-height: 100vh; width: auto; height: auto; }</style></head>
+<body epub:type="cover"><img src="${imagePath}" alt="${escapeXml(title)} 封面"/></body>
+</html>`);
+        manifestItems.push(`<item id="cover-image" href="${imagePath}" media-type="${mediaType}" properties="cover-image"/>`);
+        manifestItems.push('<item id="cover-page" href="cover.xhtml" media-type="application/xhtml+xml"/>');
+        spineItems.push('<itemref idref="cover-page"/>');
+    }
+
     // === 4. 为简介、卷和章分别生成 .xhtml 文件 ===
     sections.forEach((section, index) => {
         const number = index + 1;
@@ -410,6 +427,7 @@ hr {
         ${navigationItems.join("\n")}
       </ol>
     </nav>
+    ${cover ? '<nav epub:type="landmarks" hidden="hidden"><h2>导航</h2><ol><li><a epub:type="cover" href="cover.xhtml">封面</a></li></ol></nav>' : ""}
   </body>
 </html>`
     );
@@ -430,6 +448,7 @@ hr {
         <dc:title>${escapeXml(title)}</dc:title>
         <dc:creator>${escapeXml(author || "未知作者")}</dc:creator>
         <dc:language>zh-CN</dc:language>
+        ${cover ? '<meta name="cover" content="cover-image"/>' : ""}
         <meta property="dcterms:modified">${modified}</meta>
     </metadata>
 

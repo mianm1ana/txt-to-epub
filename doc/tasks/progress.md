@@ -2,7 +2,7 @@
 
 ## Current Status
 
-卷章标题识别规则已收紧并通过验证。
+可选 EPUB 封面已完成，原有卷章识别回归通过。
 
 ## Tasks
 
@@ -38,3 +38,14 @@
 ## Next Steps
 
 无。
+
+## 可选封面
+
+- [x] 封面上传、预览、导出与回归验证（doc/tasks/cover.md）
+
+验证记录：
+- `npm run verify:cover`：JPEG/PNG 字节、封面元数据、首位阅读顺序、导航、无封面和非法输入通过。
+- `npm run verify:book-structure`、`npm run lint`、`npm run build`、`git diff --check` 通过。
+- 浏览器实测选择 TXT、上传 PNG、显示封面预览、生成成功且下载可用、移除封面后预览消失且下载禁用。
+- 本地开发服务器首次启动受沙箱端口限制，授权重试后正常运行。
+- 尚未在实体阅读器或 EPUBCheck 中验证；浏览器 JPEG 上传与损坏图片解码未单独实测，签名和打包由脚本覆盖。

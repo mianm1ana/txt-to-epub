@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+import { readCover } from "./utils/cover";
 
 import { createEpub } from "./utils/epub"
 import { decodeTxtFile, parseBookSections } from "./utils/text";
@@ -23,6 +25,41 @@ function App() {
   const [epubBlob, setEpubBlob] = useState(null); // 生成好的 EPUB 文件
   const [status, setStatus] = useState(""); // 底部状态提示文案
   const [converting, setConverting] = useState(false); // 是否正在生成 EPUB（用来禁用按钮、显示“正在转换...”）
+
+  const [cover, setCover] = useState(null);
+  const [coverLoading, setCoverLoading] = useState(false);
+  const [coverError, setCoverError] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (cover) URL.revokeObjectURL(cover.previewUrl);
+    };
+  }, [cover]);
+
+  async function handleCoverChange(event) {
+    const selected = event.target.files?.[0];
+    event.target.value = "";
+    if (!selected) return;
+    setCoverLoading(true);
+    setCoverError("");
+    try {
+      const nextCover = await readCover(selected);
+      setCover(nextCover);
+      setEpubBlob(null);
+      setStatus("封面已更新，点击“生成 EPUB”应用封面");
+    } catch (error) {
+      setCoverError(error.message);
+    } finally {
+      setCoverLoading(false);
+    }
+  }
+
+  function handleRemoveCover() {
+    setCover(null);
+    setCoverError("");
+    setEpubBlob(null);
+    setStatus("封面已移除，请重新生成 EPUB");
+  }
 
   /**
    * 文件选择框变化时触发
@@ -81,6 +118,8 @@ function App() {
   async function handleGenerate(event) {
     event.preventDefault(); // 阻止表单默认提交行为
 
+    if (coverLoading || converting) return;
+
     if (!file) {
       setStatus("请先选择TXT文件");
       return;
@@ -110,6 +149,7 @@ function App() {
         title: bookTitle,
         author: author.trim() || "未知作者",
         sections: parsedSections,
+        cover,
       });
 
       setEpubBlob(blob); // 保存生成的EPUB Blob对象,方便预览或下载
@@ -157,8 +197,13 @@ function App() {
           author={author}
           encoding={encoding}
           converting={converting}
-          canGenerate={Boolean(file)}
-          canDownload={Boolean(epubBlob)}
+          cover={cover}
+          coverLoading={coverLoading}
+          coverError={coverError}
+          onCoverChange={handleCoverChange}
+          onRemoveCover={handleRemoveCover}
+          canGenerate={Boolean(file) && !coverLoading}
+          canDownload={Boolean(epubBlob) && !coverLoading}
           status={status}
           onFileChange={handleFileChange}
           onEncodingChange={handleEncodingChange}

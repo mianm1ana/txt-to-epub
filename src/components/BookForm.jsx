@@ -1,4 +1,9 @@
 function BookForm({
+    cover,
+    coverLoading,
+    coverError,
+    onCoverChange,
+    onRemoveCover,
     title,
     author,
     encoding,
@@ -65,6 +70,29 @@ function BookForm({
                     placeholder="请输入作者名"
                 />
             </label>
+
+            <div className="cover-field">
+                <label className="field">
+                    <span>封面（可选）</span>
+                    <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                        disabled={converting || coverLoading}
+                        onChange={onCoverChange}
+                        aria-describedby="cover-hint"
+                    />
+                </label>
+                <p id="cover-hint" className="cover-hint">支持 JPG / PNG，最大 10 MB，建议使用竖版图片。</p>
+                {coverLoading && <p role="status">正在读取封面...</p>}
+                {coverError && <p className="cover-error" role="alert">{coverError}</p>}
+                {cover && (
+                    <div className="cover-preview">
+                        <img src={cover.previewUrl} alt="所选书籍封面预览" />
+                        <p>{cover.name}</p>
+                        <button type="button" className="download-button" disabled={converting || coverLoading} onClick={onRemoveCover}>移除封面</button>
+                    </div>
+                )}
+            </div>
 
             <button
                 className="convert-button"

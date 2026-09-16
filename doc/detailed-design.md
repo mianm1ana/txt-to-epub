@@ -56,3 +56,11 @@
 - lint、生产构建。
 - 有卷、无卷、无标题解析断言。
 - EPUB 文件内 h1/h2 与 nav.xhtml 嵌套断言。
+
+## 封面接口及边界
+
+`readCover(file)` 返回 `{name, data: Uint8Array, mediaType, extension, previewUrl}`；按文件签名判别 JPEG/PNG，拒绝空文件、超限及不能解码的图片。
+App 保存 cover/loading/error，读取时禁用封面操作和生成，成功变更及移除时清空 EPUB Blob，失败保留旧封面并提示；取消文件选择不改变状态。
+预览使用 object URL，校验失败与替换/移除/卸载时释放。输入每次清空以便重选同一文件。
+createEpub 接受可选 cover，图片写入 OEBPS/images/cover.jpg 或 png；封面页引用固定安全路径，书名经过 XML 转义。
+测试覆盖图片签名/大小、JPEG/PNG 包字节、OPF 元数据和 spine 顺序、导航入口、无封面回归、空内容与非法格式。浏览器检查初始布局与交互。

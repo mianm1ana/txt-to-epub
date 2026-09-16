@@ -42,3 +42,9 @@
 ## Test Strategy
 
 通过 Node 断言解析数据，并解压生成 Blob 检查 XHTML 标题标签和嵌套导航。
+
+## 封面扩展
+
+本地 File → cover.js 校验签名与浏览器解码 → App 保存图片字节和预览 URL → BookForm 预览 → createEpub 打包。
+使用 EPUB 3 cover-image、兼容性 cover meta、独立封面 XHTML 和首位 spine；章节导航保持原状，landmarks 提供封面入口。
+选择 JPEG/PNG 以保持阅读器兼容性，不引入格式转换依赖。风险为大图内存与不同阅读器缩放差异，限制文件 10 MiB，等比例展示。
