@@ -205,7 +205,7 @@ assert.match(
 );
 assert.match(stylesheet, /body\s*{[\s\S]*text-align:\s*justify;/);
 assert.match(stylesheet, /p\s*{[\s\S]*text-indent:\s*2em;/);
-assert.match(stylesheet, /h1\.volume-title::after\s*{[\s\S]*border-top:/);
+assert.match(stylesheet, /h1\.volume-title::after\s*{[\s\S]*border-left:/);
 assert.match(stylesheet, /h2\.head span\s*{[\s\S]*background-color:\s*#8b3a3a;/);
 
 console.log("简介、卷、章解析与 EPUB 结构验证通过");

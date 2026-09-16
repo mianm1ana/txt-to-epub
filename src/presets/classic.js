@@ -79,7 +79,7 @@ h1 {
    第一卷 风起
    ========================= */
 
-/* 简介与卷首沿用正文暗红印签，用窄版心和短线区分层级。 */
+/* 同一暗红色系，简介为导读页、卷首为扉页，正文保留印签。 */
 .opening {
     max-width: 32em;
     margin: 0 auto;
@@ -87,7 +87,7 @@ h1 {
 }
 
 h1.volume-title {
-    margin: 3em 0 1.6em;
+    margin: 3.5em 0 1.8em;
     padding: 0;
     font-size: 1.8em;
     line-height: 1.7;
@@ -101,25 +101,29 @@ h1.volume-title {
 
 .volume-number {
     display: inline-block;
-    padding: 0.15em 0.6em;
-    margin-bottom: 1.2em;
-    color: #fff;
-    background-color: #8b3a3a;
-    font-size: 0.55em;
+    padding: 0 0 0.65em;
+    margin-bottom: 1.6em;
+    border-bottom: 1px solid #8b3a3a;
+    color: #8b3a3a;
+    letter-spacing: 0.35em;
+    font-size: 0.5em;
     font-weight: normal;
     line-height: 1.5;
 }
 
 .volume-name {
+    font-size: 1.2em;
+    letter-spacing: 0.25em;
     overflow-wrap: break-word;
 }
 
 h1.volume-title::after {
     content: "";
     display: block;
-    width: 2em;
-    margin: 1.2em auto 0;
-    border-top: 1px solid #8b3a3a;
+    width: 1px;
+    height: 1.6em;
+    margin: 1em auto 0;
+    border-left: 1px solid #8b3a3a;
 }
 
 .opening--volume p {
@@ -130,16 +134,16 @@ h1.volume-title::after {
 }
 
 h2.intro-title {
-    margin: 2.8em 0 2em;
-    font-size: 1.4em;
+    margin: 2.8em 0 1.5em;
+    padding-bottom: 0.7em;
+    border-bottom: 1px solid #c9b5b1;
+    text-align: left;
+    font-size: 1.5em;
+    letter-spacing: 0.25em;
 }
 
 .intro-title span {
-    display: inline-block;
-    padding: 0.15em 0.6em;
-    color: #fff;
-    background-color: #8b3a3a;
-    font-size: 0.7em;
+    color: #8b3a3a;
     font-weight: normal;
     line-height: 1.5;
 }
@@ -150,16 +154,15 @@ h2.intro-title {
 }
 
 .opening--intro p:first-of-type {
-    border-left: 2px solid #8b3a3a;
-    padding-left: 1em;
     text-indent: 0;
+    color: #555;
 }
 
 .opening--intro::after {
     content: "";
     display: block;
     width: 2.8em;
-    margin: 2em auto 0;
+    margin: 2em 0 0;
     border-top: 1px solid #8b3a3a;
 }
 
