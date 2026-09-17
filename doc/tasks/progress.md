@@ -2,7 +2,7 @@
 
 ## Current Status
 
-经典小说预设与排版示例已完成，原有卷章和封面回归通过。
+「欲语」预设与排版示例已完成，原有卷章和封面回归通过。
 
 ## Tasks
 
@@ -51,7 +51,7 @@
 - 尚未在实体阅读器或 EPUBCheck 中验证；浏览器 JPEG 上传与损坏图片解码未单独实测，签名和打包由脚本覆盖。
 
 ## 生成预设
-- [x] 经典小说预设抽取、示例预览、生成接入和验证（presets.md）
+- [x] 「欲语」预设抽取、示例预览、生成接入和验证（presets.md）
 
 预设验证记录：
 - verify:presets、verify:book-structure、verify:cover、lint、build 均通过。

@@ -1,6 +1,6 @@
 # Task: 生成预设与美化示例
 
-目标：把当前划分与排版作为经典小说内置预设，并可预览。
+目标：把当前划分与排版作为「欲语」内置预设，并可预览。
 输入：proposal、high-level-design、detailed-design、progress。
 文件：src/presets/*、src/utils/book-render.js、epub.js、App.jsx、BookForm.jsx、ChapterPreview.jsx、PresetPreview.jsx、App.css、scripts/verify-presets.mjs、package.json。
 依赖：当前解析器、React、JSZip。

@@ -3,7 +3,7 @@ import { createSectionXhtml } from "../utils/book-render.js";
 
 export const classicPreset = {
     id: "classic-novel",
-    name: "经典小说",
+    name: "欲语",
     description: "沿用当前划分与美化：分层目录、独立卷首、红色章号与首行缩进。",
     rules: [
         "自动划分简介、卷 / 部、章节；支持中文章号、Chapter N、番外和完本感言。",
