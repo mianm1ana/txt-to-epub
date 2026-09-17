@@ -134,3 +134,13 @@ input::file-selector-button { background: var(--raised); color: var(--ink); bord
   .footer > span:last-child { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+
+.chapter-detail { min-width: 0; }
+.section-editor { padding: var(--s4); border-bottom: 1px solid var(--line); background: var(--surface); }
+.editor-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s2); align-items: center; margin-bottom: var(--s4); }
+.editor-heading h3 { margin: 0; font-size: 13px; font-weight: 500; }
+.editor-heading > span { font-size: 10px; color: var(--muted); }
+.editor-fields { display: grid; grid-template-columns: minmax(0, 1fr) 110px; gap: var(--s3); }
+.editor-actions { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
+.editor-actions button { min-height: 36px; font-size: 11px; padding: var(--s2) var(--s3); }
+@media (max-width: 420px) { .editor-fields { grid-template-columns: 1fr; } }

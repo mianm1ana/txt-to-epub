@@ -11,6 +11,8 @@ import ChapterPreview from './components/ChapterPreview';
 import BookForm from './components/BookForm';
 
 import './App.css';
+import SectionEditor from './components/SectionEditor';
+import { editSection, mergeWithPrevious } from './utils/section-edit.js';
 import { DEFAULT_PRESET_ID, getPreset } from './presets/index.js';
 import PresetPreview from './components/PresetPreview';
 
@@ -23,6 +25,8 @@ function App() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [encoding, setEncoding] = useState("auto"); // 文本编码：auto / utf-8 / gb18030
+  const [editHistory, setEditHistory] = useState([]);
+  const [editRevision, setEditRevision] = useState(0);
   const [sections, setSections] = useState([]); // 解析出来的简介、卷和章节
   const [selectedSectionIndex, setSelectedSectionIndex] = useState(0); // 当前查看的是哪一项
   const [epubBlob, setEpubBlob] = useState(null); // 生成好的 EPUB 文件
@@ -43,9 +47,30 @@ function App() {
     if (nextId === presetId) return;
     setPresetId(nextId);
     setSections([]);
+    setEditHistory([]);
     setSelectedSectionIndex(0);
     setEpubBlob(null);
     setStatus("生成预设已更改，请重新生成 EPUB");
+  }
+
+  function applySectionEdit(nextSections, nextIndex = selectedSectionIndex) {
+    setEditHistory(history => [...history.slice(-29), { sections, index: selectedSectionIndex }]);
+    setSections(nextSections);
+    setSelectedSectionIndex(nextIndex);
+    setEditRevision(value => value + 1);
+    setEpubBlob(null);
+    setStatus("章节已修正，请点击“生成 EPUB”导出修改后的内容");
+  }
+
+  function undoSectionEdit() {
+    const previous = editHistory.at(-1);
+    if (!previous) return;
+    setSections(previous.sections);
+    setSelectedSectionIndex(previous.index);
+    setEditHistory(history => history.slice(0, -1));
+    setEditRevision(value => value + 1);
+    setEpubBlob(null);
+    setStatus("已撤销上次修改，请重新生成 EPUB");
   }
 
   async function handleCoverChange(event) {
@@ -89,6 +114,7 @@ function App() {
     if (!selectedFile.name.toLowerCase().endsWith(".txt")) {
       setFile(null);
       setSections([]);
+      setEditHistory([]);
       setEpubBlob(null);
       setStatus("请选择 .txt 文件");
       return;
@@ -96,6 +122,7 @@ function App() {
 
     setFile(selectedFile);
     setSections([]);
+    setEditHistory([]);
     setSelectedSectionIndex(0);
     setEpubBlob(null);
 
@@ -117,6 +144,7 @@ function App() {
 
     if (file) {
       setSections([]);
+      setEditHistory([]);
       setSelectedSectionIndex(0);
       setEpubBlob(null);
       setStatus("文本编码已更改，点击“生成 EPUB”重新解析");
@@ -139,18 +167,22 @@ function App() {
 
     setConverting(true);
     setEpubBlob(null);
-    setStatus("正在解析 TXT 并生成 EPUB...");
+    setStatus(sections.length ? "正在按当前目录生成 EPUB..." : "正在解析 TXT 并生成 EPUB...");
 
     try {
-      const decodedText = await decodeTxtFile(file, encoding);
-      const parsedSections = getPreset(presetId).parse(decodedText);
+      // Reuse the corrected structure instead of overwriting it by reparsing TXT.
+      const parsedSections = sections.length
+        ? sections
+        : getPreset(presetId).parse(await decodeTxtFile(file, encoding));
 
       if (parsedSections.length === 0) {
         throw new Error("TXT 文件没有可转换的内容");
       }
 
-      setSections(parsedSections);
-      setSelectedSectionIndex(0);
+      if (!sections.length) {
+        setSections(parsedSections);
+        setSelectedSectionIndex(0);
+      }
 
       // 书名兜底: 没填就用文件名
       const bookTitle =
@@ -251,7 +283,19 @@ function App() {
               selectedIndex={selectedSectionIndex}
               onSelect={setSelectedSectionIndex}
             />
-            <ChapterPreview section={selectedSection} presetId={presetId} />
+            <div className="chapter-detail">
+              {selectedSection && <SectionEditor
+                key={`${selectedSectionIndex}-${editRevision}-${file?.name}-${encoding}-${presetId}`}
+                section={selectedSection}
+                previous={sections[selectedSectionIndex - 1]}
+                disabled={converting}
+                canUndo={editHistory.length > 0}
+                onSave={values => applySectionEdit(editSection(sections, selectedSectionIndex, values))}
+                onMerge={() => applySectionEdit(mergeWithPrevious(sections, selectedSectionIndex), selectedSectionIndex - 1)}
+                onUndo={undoSectionEdit}
+              />}
+              <ChapterPreview section={selectedSection} presetId={presetId} />
+            </div>
           </section>
         </div>
       </div>
