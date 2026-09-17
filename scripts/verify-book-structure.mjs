@@ -79,15 +79,16 @@ const partAsVolume = parseBookSections(`故事简介
 
 assert.deepEqual(
     partAsVolume.map((section) => section.type),
-    ["intro", "volume", "chapter", "volume", "chapter"],
+    ["intro", "part", "chapter", "part", "chapter"],
 );
 assert.equal(partAsVolume[1].title, "【第一部：戏中人】");
-assert.equal(partAsVolume[2].volumeTitle, "【第一部：戏中人】");
+assert.equal(partAsVolume[2].partTitle, "【第一部：戏中人】");
+assert.equal(partAsVolume[2].volumeTitle, "");
 assert.deepEqual(partAsVolume[2].paragraphs, [
     "第一部电影只是正文中的普通说法",
 ]);
 assert.equal(partAsVolume[3].title, "第二部 终局");
-assert.equal(partAsVolume[4].volumeTitle, "第二部 终局");
+assert.equal(partAsVolume[4].partTitle, "第二部 终局");
 
 const volumeMentionsInBody = parseBookSections(`第一章 开始
 这是正常正文
@@ -173,6 +174,7 @@ const withoutHeadings = parseBookSections("只有正文第一段\n只有正文�
 assert.deepEqual(withoutHeadings, [{
     type: "chapter",
     title: "正文",
+    partTitle: "",
     volumeTitle: "",
     paragraphs: ["只有正文第一段", "只有正文第二段"],
 }]);

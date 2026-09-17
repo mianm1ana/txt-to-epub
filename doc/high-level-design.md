@@ -16,19 +16,20 @@
 
 ```js
 {
-  type: "intro" | "volume" | "chapter",
+  type: "intro" | "part" | "volume" | "chapter",
   title: string,
+  partTitle: string,
   volumeTitle: string,
   paragraphs: string[],
 }
 ```
 
-简介和卷的 `volumeTitle` 为空；章在有卷时记录所属卷标题。
+简介、部的父级标题为空；卷记录所属部，章记录所属部与卷。缺少层级时对应标题为空。
 
 ## Major Decisions
 
 - 使用扁平数组保存阅读顺序，降低 React state 和 EPUB spine 的复杂度。
-- 用 `volumeTitle` 建立卷章关系，生成导航时再组合成嵌套列表。
+- `hierarchy.js` 按阅读顺序计算父节点位置和深度，供网页目录、EPUB 导航与纠错共用；标题仅作显示，不作为父节点标识，支持重名卷。
 - 卷也生成独立 XHTML，保证阅读顺序和目录锚点稳定。
 
 ## Alternatives Considered

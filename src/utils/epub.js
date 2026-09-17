@@ -7,61 +7,23 @@ import { getPreset, DEFAULT_PRESET_ID } from "../presets/index.js";
 
 import JSZip from "jszip";
 import { identifyCover } from "./cover.js";
+import { buildHierarchy } from "./hierarchy.js";
 
 /**
  * 生成 EPUB 导航目录。
- * 简介和无卷章节在顶层；卷在顶层，其章节放在内部 ol 中。
+ * 与网页目录共用层级关系，按部 → 卷 → 章生成嵌套 ol。
  */
 function createNavigationItems(sections) {
-    const groups = [];
-    let currentVolumeGroup = null;
-
-    sections.forEach((section, index) => {
-        const entry = {
-            section,
-            fileName: `section-${index + 1}.xhtml`,
-        };
-
-        if (section.type === "volume") {
-            currentVolumeGroup = {
-                volume: entry,
-                chapters: [],
-            };
-            groups.push(currentVolumeGroup);
-            return;
-        }
-
-        const belongsToCurrentVolume =
-            section.type === "chapter" &&
-            section.volumeTitle &&
-            currentVolumeGroup?.volume.section.title === section.volumeTitle;
-
-        if (belongsToCurrentVolume) {
-            currentVolumeGroup.chapters.push(entry);
-            return;
-        }
-
-        groups.push({ standalone: entry });
+    const roots = [];
+    const nodes = buildHierarchy(sections).map(entry => ({ ...entry, children: [] }));
+    nodes.forEach(node => {
+        (node.parentIndex === null ? roots : nodes[node.parentIndex].children).push(node);
     });
-
-    return groups.map((group) => {
-        if (group.standalone) {
-            const { section, fileName } = group.standalone;
-            return `<li><a href="${fileName}">${escapeXml(section.title)}</a></li>`;
-        }
-
-        const { section, fileName } = group.volume;
-        const nestedChapters = group.chapters
-            .map((chapter) => (
-                `<li><a href="${chapter.fileName}">${escapeXml(chapter.section.title)}</a></li>`
-            ))
-            .join("\n");
-        const nestedList = nestedChapters
-            ? `<ol>\n${nestedChapters}\n</ol>`
-            : "";
-
-        return `<li><a href="${fileName}">${escapeXml(section.title)}</a>${nestedList}</li>`;
-    });
+    function render(node) {
+        const children = node.children.length ? `<ol>\n${node.children.map(render).join('\n')}\n</ol>` : '';
+        return `<li><a href="section-${node.index + 1}.xhtml">${escapeXml(node.section.title)}</a>${children}</li>`;
+    }
+    return roots.map(render);
 }
 
 /**
@@ -241,6 +203,7 @@ export async function createEpub({ title, author, sections, cover = null, preset
     //返回生成的文件和章节数量,方便UI展示
     return {
         blob,
+        partCount: sections.filter(section => section.type === "part").length,
         chapterCount: sections.filter(
             (section) => section.type === "chapter"
         ).length,

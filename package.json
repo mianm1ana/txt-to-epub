@@ -11,7 +11,8 @@
     "verify:book-structure": "node scripts/verify-book-structure.mjs",
     "verify:cover": "node scripts/verify-cover.mjs",
     "verify:presets": "node scripts/verify-presets.mjs",
-    "verify:section-edit": "node scripts/verify-section-edit.mjs"
+    "verify:section-edit": "node scripts/verify-section-edit.mjs",
+    "verify:hierarchy": "node scripts/verify-hierarchy.mjs"
   },
   "dependencies": {
     "jszip": "^3.10.1",

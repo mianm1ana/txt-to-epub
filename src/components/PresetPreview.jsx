@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { createPreviewDocument, getPreset } from '../presets/index.js';
 
 function PresetPreview({ presetId }) {
-    const [sampleIndex, setSampleIndex] = useState(2);
+    const [sampleIndex, setSampleIndex] = useState(3);
     const preset = getPreset(presetId);
     const samples = preset.parse(preset.sampleText);
     const selectedIndex = Math.min(sampleIndex, samples.length - 1);
-    const labels = { intro: '简介', volume: '卷首', chapter: '章节正文' };
+    const labels = { intro: '简介', part: '部首页', volume: '卷首', chapter: '章节正文' };
 
     return (
         <section className="preset-preview" aria-label="预设美化示例">

@@ -1,3 +1,5 @@
+import { normalizeSections } from './hierarchy.js';
+
 /**
  * 读取用户选择的TXT文件,并尽量自动识别编码
  * @param {File} file - 用户上传的 .txt 文件
@@ -26,18 +28,19 @@ export async function decodeTxtFile(file, encoding = "auto") {
 
 /**
  * @typedef {Object} BookSection
- * @property {"intro" | "volume" | "chapter"} type
+ * @property {"intro" | "part" | "volume" | "chapter"} type
  * @property {string} title
  * @property {string} volumeTitle
+ * @property {string} partTitle
  * @property {string[]} paragraphs
  */
 
 /**
- * 把整本 TXT 拆成“简介 / 卷 / 章”。
+ * 把整本 TXT 拆成“简介 / 部 / 卷 / 章”。
  *
  * 规则：
  * 1. 第一个卷或章标题之前的内容是简介。
- * 2. “第X卷”是卷。
+ * 2. “第X部”是部，“第X卷”是卷。
  * 3. “第X章/节/回/篇”、Chapter N、序章等是章节。
  * 4. 没有任何结构标题时，整本书作为一个“正文”章节。
  *
@@ -153,6 +156,7 @@ export function parseBookSections(text) {
         }
 
         if (isLikelyHeading(line, "volume")) {
+            const type = new RegExp(`^[【\\[［《]?\\s*第[${chineseNumber}]+部`).test(line) ? 'part' : 'volume';
             if (!foundHeading) {
                 addIntroIfNeeded();
             }
@@ -161,13 +165,13 @@ export function parseBookSections(text) {
 
             // 部分 TXT 会把同一个标题连续保存两次。此时保留第一条，
             // 但有正文分隔的同名卷仍按两个独立结构处理。
-            if (isRepeatedEmptyHeading("volume", line)) {
+            if (isRepeatedEmptyHeading(type, line)) {
                 continue;
             }
 
             currentVolumeTitle = line;
             currentSection = {
-                type: "volume",
+                type,
                 title: line,
                 volumeTitle: "",
                 paragraphs: [],
@@ -210,13 +214,13 @@ export function parseBookSections(text) {
     }
 
     if (!foundHeading && beforeFirstHeading.length > 0) {
-        return [{
+        return normalizeSections([{
             type: "chapter",
             title: "正文",
             volumeTitle: "",
             paragraphs: beforeFirstHeading,
-        }];
+        }]);
     }
 
-    return sections;
+    return normalizeSections(sections);
 }

@@ -9,7 +9,7 @@ export default function SectionEditor({ section, previous, disabled, onSave, onM
             <div className="editor-heading"><h3>章节纠错</h3><span>修改后重新生成 EPUB</span></div>
             <div className="editor-fields">
                 <label className="field"><span>当前标题</span><input value={title} disabled={disabled} onChange={event => setTitle(event.target.value)} required /></label>
-                <label className="field"><span>内容类型</span><select value={type} disabled={disabled} onChange={event => setType(event.target.value)}><option value="intro">简介</option><option value="volume">卷 / 部</option><option value="chapter">章节</option></select></label>
+                <label className="field"><span>内容类型</span><select value={type} disabled={disabled} onChange={event => setType(event.target.value)}><option value="intro">简介</option><option value="part">部</option><option value="volume">卷</option><option value="chapter">章节</option></select></label>
             </div>
             <div className="editor-actions">
                 <button className="convert-button" disabled={disabled || !dirty || !title.trim()} type="submit">应用修改</button>

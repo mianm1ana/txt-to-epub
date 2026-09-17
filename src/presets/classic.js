@@ -4,15 +4,19 @@ import { createSectionXhtml } from "../utils/book-render.js";
 export const classicPreset = {
     id: "classic-novel",
     name: "欲语",
-    description: "沿用当前划分与美化：分层目录、独立卷首、红色章号与首行缩进。",
+    description: "部、卷、章三级目录，部首页与卷首独立排版，暗红章号与首行缩进。",
     rules: [
-        "自动划分简介、卷 / 部、章节；支持中文章号、Chapter N、番外和完本感言。",
+        "自动划分简介、部、卷、章节；支持部 → 卷 → 章，也支持部下直接分章、无部或无卷的小说。",
+        "支持中文章号、Chapter N、番外和完本感言；更换部时重置卷归属。",
         "支持括号标题，过滤常见正文误判，合并正文开始前连续重复的同名标题。",
         "没有标题时保留为一个正文章节；正文首行缩进两字，行距 1.8。",
     ],
     parse: parseBookSections,
     renderSection: createSectionXhtml,
     sampleText: `这是一段小说简介。远山与长河之间，一段故事正缓缓展开。
+
+第一部 山河之间
+每一次远行，都是与自己重逢的开始。
 
 第一卷 风起
 晨光越过山脊，照亮了通往远方的小路。
@@ -85,6 +89,32 @@ h1 {
     margin: 0 auto;
     padding: 0 1em 2em;
 }
+
+/* 部首页：偏左的篇章扉页；卷首保持居中的细线风格。 */
+h1.part-title {
+    margin: 2.8em 0 1.5em;
+    padding: 0.3em 0 0.3em 0.7em;
+    border-left: 3px solid #8b3a3a;
+    font-size: 2.2em;
+    line-height: 1.6;
+    text-align: left;
+    color: #333;
+    overflow-wrap: break-word;
+    page-break-after: avoid;
+    break-after: avoid;
+}
+
+.part-number {
+    display: inline-block;
+    margin-bottom: 1.8em;
+    font-size: 0.38em;
+    font-weight: normal;
+    letter-spacing: 0.3em;
+    color: #8b3a3a;
+}
+
+.part-name { letter-spacing: 0.12em; }
+.opening--part p { color: #555; line-height: 1.9; }
 
 h1.volume-title {
     margin: 3.5em 0 1.8em;

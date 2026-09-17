@@ -9,9 +9,9 @@ assert.equal(getPreset().id, DEFAULT_PRESET_ID);
 assert.throws(() => getPreset('missing'), /找不到生成预设/);
 for (const preset of PRESETS) {
     const sections = preset.parse(preset.sampleText);
-    assert.deepEqual(sections.map(s => s.type), ['intro', 'volume', 'chapter']);
+    assert.deepEqual(sections.map(s => s.type), ['intro', 'part', 'volume', 'chapter']);
     assert.deepEqual(sections, parseBookSections(preset.sampleText));
-    assert.equal(sections[2].paragraphs.length, 3);
+    assert.equal(sections[3].paragraphs.length, 3);
     const book = { title: '预设测试', sections, presetId: preset.id };
     const { blob } = await createEpub(book);
     const zip = await JSZip.loadAsync(await blob.arrayBuffer());
@@ -22,8 +22,9 @@ for (const preset of PRESETS) {
         assert.ok(preview.includes(`<style>${preset.css}</style>`));
         assert.equal(preview.replace(`<style>${preset.css}</style>`, '<link rel="stylesheet" type="text/css" href="style.css"/>'), preset.renderSection(section, 0));
     }
-    assert.match(createPreviewDocument(sections[1], preset.id), /class="volume-title"/);
-    assert.match(createPreviewDocument(sections[2], preset.id), /<span>第一章<\/span>/);
+    assert.match(createPreviewDocument(sections[1], preset.id), /class="part-title"/);
+    assert.match(createPreviewDocument(sections[2], preset.id), /class="volume-title"/);
+    assert.match(createPreviewDocument(sections[3], preset.id), /<span>第一章<\/span>/);
     const unsafe = { type: 'chapter', title: '<script>标题</script>', paragraphs: ['<img onerror="alert(1)"> & 正文'] };
     const preview = createPreviewDocument(unsafe, preset.id);
     assert.doesNotMatch(preview, /<script>|<img onerror/);
@@ -41,8 +42,9 @@ await assert.rejects(createEpub({ title: '测试', sections, presetId: 'missing'
 console.log('预设注册、解析、默认兼容、排版预览与导出一致性验证通过');
 
 for (const [title, number, name] of [['【第一卷：风起】', '第一卷', '风起'], ['第二部 归途', '第二部', '归途'], ['第三卷', '第三卷', '']]) {
-    const html = getPreset().renderSection({ type: 'volume', title, paragraphs: [] }, 0);
-    assert.ok(html.includes(`<span class="volume-number">${number}</span>`));
-    if (name) assert.ok(html.includes(`<span class="volume-name">${name}</span>`));
-    else assert.ok(!html.includes('class="volume-name"'));
+    const type = title.includes('部') ? 'part' : 'volume';
+    const html = getPreset().renderSection({ type, title, paragraphs: [] }, 0);
+    assert.ok(html.includes(`<span class="${type}-number">${number}</span>`));
+    if (name) assert.ok(html.includes(`<span class="${type}-name">${name}</span>`));
+    else assert.ok(!html.includes(`class="${type}-name"`));
 }

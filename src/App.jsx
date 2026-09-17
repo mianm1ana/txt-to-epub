@@ -189,7 +189,7 @@ function App() {
         title.trim() || file.name.replace(/\.txt$/i, "");
       
       // 核心: 生成EPUB Blob + 章节数
-      const { blob, chapterCount, volumeCount } = await createEpub({
+      const { blob, chapterCount, volumeCount, partCount } = await createEpub({
         title: bookTitle,
         author: author.trim() || "未知作者",
         sections: parsedSections,
@@ -198,7 +198,7 @@ function App() {
       });
 
       setEpubBlob(blob); // 保存生成的EPUB Blob对象,方便预览或下载
-      setStatus(`EPUB 生成成功（${getPreset(presetId).name}），共 ${volumeCount} 卷、${chapterCount} 章`);
+      setStatus(`EPUB 生成成功（${getPreset(presetId).name}），共 ${partCount} 部、${volumeCount} 卷、${chapterCount} 章`);
     }catch (error) {
       console.error(error);
       setStatus(`生成EPUB失败: ${error.message}`);

@@ -16,14 +16,15 @@ export function escapeXml(value = "") {
  * 章节标题可拆成“章节编号 + 标题”，用于红色编号样式。
  */
 function createSectionHeading(section) {
-    if (section.type === "volume") {
+    if (section.type === "volume" || section.type === "part") {
+        const prefix = section.type;
         const title = section.title.replace(/^[【[［《]\s*(.*?)\s*[】\]］》]$/, "$1");
         const match = title.match(/^(第[一二三四五六七八九十百千万零〇两0-9]+[卷部])(?:[：:]\s*|\s+)?(.*)$/);
         if (match) {
             const subtitle = match[2].trim();
-            return `<h1 class="volume-title"><span class="volume-number">${escapeXml(match[1])}</span>${subtitle ? `<br/><span class="volume-name">${escapeXml(subtitle)}</span>` : ""}</h1>`;
+            return `<h1 class="${prefix}-title"><span class="${prefix}-number">${escapeXml(match[1])}</span>${subtitle ? `<br/><span class="${prefix}-name">${escapeXml(subtitle)}</span>` : ""}</h1>`;
         }
-        return `<h1 class="volume-title">${escapeXml(section.title)}</h1>`;
+        return `<h1 class="${prefix}-title">${escapeXml(section.title)}</h1>`;
     }
 
     if (section.type === "chapter") {
@@ -73,11 +74,10 @@ export function createSectionXhtml(section, index) {
     <link rel="stylesheet" type="text/css" href="style.css"/>
   </head>
   <body>
-    <section id="section-${index + 1}"${section.type === "intro" || section.type === "volume" ? ` class="opening opening--${section.type}"` : ""}>
+    <section id="section-${index + 1}"${['intro', 'part', 'volume'].includes(section.type) ? ` class="opening opening--${section.type}"` : ""}>
       ${heading}
       ${paragraphs}
     </section>
   </body>
 </html>`;
 }
-

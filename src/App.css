@@ -90,7 +90,9 @@ input::file-selector-button { background: var(--raised); color: var(--ink); bord
 .chapter-button:hover { background: var(--raised); color: var(--ink); }
 .chapter-button.active { border-left-color: var(--accent); background: var(--raised); color: var(--accent); }
 .chapter-button--volume { font-weight: 600; color: var(--ink); margin-top: var(--s2); }
-.chapter-button--nested { padding-left: var(--s5); }
+.chapter-button--depth-1 { padding-left: var(--s5); }
+.chapter-button--depth-2 { padding-left: var(--s8); }
+.chapter-button--part { font-weight: 700; color: var(--accent); margin-top: var(--s4); border-top: 1px solid var(--line); }
 .chapter-preview { padding: var(--s4); }
 .chapter-preview-frame { display: block; width: 100%; height: 100%; border: 0; color-scheme: light; background: var(--reading-page); }
 .reading-empty { min-height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: var(--s4); }
