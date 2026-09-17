@@ -231,7 +231,7 @@ function App() {
   return (
     <main className="page">
       <nav className="masthead" aria-label="品牌信息">
-        <a className="brand" href="#"><i className="fa-solid fa-book-open" aria-hidden="true" /> 纸间 <span> / PAPERWORK</span></a>
+        <a className="brand" href="#"><img className="brand-mascot" src="/book-spirit-mark.png" alt="" width="36" height="36" /> 纸间 <span> / PAPERWORK</span></a>
         <span className="local-badge"><span className="live-dot" /> 本地运行 · 文件不上传</span>
       </nav>
       <header className="header">

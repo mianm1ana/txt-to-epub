@@ -144,3 +144,5 @@ input::file-selector-button { background: var(--raised); color: var(--ink); bord
 .editor-actions { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s3); }
 .editor-actions button { min-height: 36px; font-size: 11px; padding: var(--s2) var(--s3); }
 @media (max-width: 420px) { .editor-fields { grid-template-columns: 1fr; } }
+
+.brand-mascot { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; }
