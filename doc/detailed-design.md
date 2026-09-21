@@ -4,8 +4,8 @@
 
 - `src/utils/text.js`：新增并导出 `parseBookSections`。
 - `src/App.jsx`：使用 sections 数据与分类型计数。
-- `src/components/ChapterList.jsx`：给简介、卷、章增加类型 class。
-- `src/components/ChapterPreview.jsx`：卷用 h1，其他用 h2。
+- `src/components/ChapterList.jsx`：用 `buildHierarchy` 输出按阅读顺序计算的目录层级，并给类型和深度增加 class。
+- `src/components/ChapterPreview.jsx`：调用 `createPreviewDocument`，在 sandbox iframe 中展示与 EPUB 同源的实际章节排版。
 - `src/App.css`：章节缩进和卷标题预览样式。
 - `src/utils/epub.js`：按类型渲染并构建嵌套目录。
 
@@ -66,4 +66,4 @@ createEpub 接受可选 cover，图片写入 OEBPS/images/cover.jpg 或 png；�
 测试覆盖图片签名/大小、JPEG/PNG 包字节、OPF 元数据和 spine 顺序、导航入口、无封面回归、空内容与非法格式。浏览器检查初始布局与交互。
 
 ## 预设实现
-新增 src/presets/classic.js、index.js 及 utils/book-render.js；保留 parseBookSections 默认接口。createEpub 增加可选 presetId，默认 classic-novel，未知 id 报错。共享渲染生成 XHTML，预览仅将外部 style.css 链接替换为同源预设内联样式。示例由 sampleText 经预设 parse 得出并提供简介/卷首/章节切换。PresetPreview 常驻右侧上方，实际章节预览也复用渲染；切换预设清空 sections/Blob。预设为可信内置代码，不允许用户注入脚本。测试检查默认兼容、注册表有效性、示例及实际输出同源和 XML 转义、封面回归。
+src/presets/ 以各自模块提供内置「欲语」与「微澜」预设，index.js 注册并维持 classic-novel 为默认值；二者保留 parseBookSections 默认接口，使用共享 utils/book-render.js 生成 XHTML。createEpub 接受可选 presetId，未知 id 报错。预览仅将外部 style.css 链接替换为同源预设内联样式。示例由 sampleText 经预设 parse 得出并提供简介/卷首/章节切换，且样张默认展开。PresetPreview 位于主工作区上方，实际章节预览也复用渲染；切换预设清空 sections/Blob。桌面章节工作台将目录、230 px 的纠错区和剩余高度的预览区分为独立滚动面；窄屏改为纵向堆叠。预设为可信内置代码，不允许用户注入脚本。测试检查默认兼容、注册表有效性、示例及实际输出同源和 XML 转义、封面回归。

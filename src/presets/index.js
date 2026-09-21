@@ -1,6 +1,7 @@
 import { classicPreset } from "./classic.js";
+import { ripplePreset } from "./ripple.js";
 
-export const PRESETS = [classicPreset];
+export const PRESETS = [classicPreset, ripplePreset];
 export const DEFAULT_PRESET_ID = classicPreset.id;
 
 export function getPreset(id = DEFAULT_PRESET_ID) {

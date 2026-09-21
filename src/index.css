@@ -1,26 +1,28 @@
 :root {
-  font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  color: #ede9df;
-  background: #1b1c19;
+  --ui-font: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --display-font: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", Georgia, serif;
+  font-family: var(--ui-font);
+  color: #f2eee6;
+  background: #191a16;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   color-scheme: dark;
-  --bg: #1b1c19;
-  --surface: #22231f;
+  --bg: #191a16;
+  --surface: #20211d;
   --raised: #292a25;
-  --ink: #ede9df;
-  --muted: #a4a69a;
-  --line: #3d3f35;
-  --accent: #e4b36b;
-  --accent-hover: #f1c78c;
-  --accent-ink: #252318;
+  --ink: #f2eee6;
+  --muted: #aaa89d;
+  --line: #41433b;
+  --accent: #d4785f;
+  --accent-hover: #e88b72;
+  --accent-ink: #211916;
   --reading-page: #ffffff;
   --paper: #f2eee4;
   --paper-ink: #36372e;
   --paper-muted: #77796b;
   --paper-line: #d6d2c7;
   --error: #f4a295;
-  --success: #adb989;
+  --success: #b9c48d;
   --s1: 4px;
   --s2: 8px;
   --s3: 12px;
@@ -32,7 +34,7 @@
   --s12: 48px;
   --s16: 64px;
   --s20: 80px;
-  --radius: 3px;
+  --radius: 0px;
 }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; }

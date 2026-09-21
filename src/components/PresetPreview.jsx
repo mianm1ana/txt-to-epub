@@ -3,6 +3,7 @@ import { createPreviewDocument, getPreset } from '../presets/index.js';
 
 function PresetPreview({ presetId }) {
     const [sampleIndex, setSampleIndex] = useState(3);
+    const [sampleExpanded, setSampleExpanded] = useState(true);
     const preset = getPreset(presetId);
     const samples = preset.parse(preset.sampleText);
     const selectedIndex = Math.min(sampleIndex, samples.length - 1);
@@ -23,21 +24,26 @@ function PresetPreview({ presetId }) {
                     </select>
                 </label>
             </div>
-            <div className="paper-stage">
-            <div className="paper-caption"><span>排版样张 / SPECIMEN</span><span>{String(selectedIndex + 1).padStart(2, '0')} / {String(samples.length).padStart(2, '0')}</span></div>
-            <iframe
-                className="preset-sample-frame"
-                title={`${preset.name}排版示例`}
-                sandbox=""
-                srcDoc={createPreviewDocument(samples[selectedIndex], presetId)}
-            />
-            <div className="paper-bottom">{preset.name} <span>·</span> 为长篇阅读而设计</div>
+            <button className="sample-toggle" type="button" onClick={() => setSampleExpanded(value => !value)} aria-expanded={sampleExpanded} aria-controls="sample-body">
+                <span>查看排版样张</span><span>{sampleExpanded ? '收起' : '打开'}</span>
+            </button>
+            <div className="sample-body" id="sample-body">
+                <div className="paper-stage">
+                    <div className="paper-caption"><span>排版样张 / SPECIMEN</span><span>{String(selectedIndex + 1).padStart(2, '0')} / {String(samples.length).padStart(2, '0')}</span></div>
+                    <iframe
+                        className="preset-sample-frame"
+                        title={`${preset.name}排版示例`}
+                        sandbox=""
+                        srcDoc={createPreviewDocument(samples[selectedIndex], presetId)}
+                    />
+                    <div className="paper-bottom">{preset.name} <span>·</span> 为长篇阅读而设计</div>
+                </div>
+                <details className="preset-rules">
+                    <summary>查看 TXT 划分规则与示例原文</summary>
+                    <ul>{preset.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
+                    <pre>{preset.sampleText}</pre>
+                </details>
             </div>
-            <details className="preset-rules">
-                <summary>查看 TXT 划分规则与示例原文</summary>
-                <ul>{preset.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
-                <pre>{preset.sampleText}</pre>
-            </details>
         </section>
     );
 }

@@ -226,28 +226,30 @@ function App() {
   }
 
   const selectedSection = sections[selectedSectionIndex];
+  const workflowStep = epubBlob ? 3 : file ? 2 : 1;
 
   // --- 界面 ---
   return (
     <main className="page">
       <nav className="masthead" aria-label="品牌信息">
-        <a className="brand" href="#"><img className="brand-mascot" src="/book-spirit-mark.png" alt="" width="36" height="36" /> 纸间 <span> / PAPERWORK</span></a>
-        <span className="local-badge"><span className="live-dot" /> 本地运行 · 文件不上传</span>
+        <a className="brand" href="#top"><img className="brand-mascot" src="/book-spirit-mark.png" alt="" width="36" height="36" /> <span className="brand-name">纸间</span> <span className="brand-english">PAPERWORK</span></a>
+        <span className="local-badge"><span className="live-dot" aria-hidden="true" /> 本地制书 · 文件不离开浏览器</span>
       </nav>
-      <header className="header">
-        <div>
-          <p className="eyebrow">A SMALL WORKSHOP FOR BIG STORIES</p>
-          <h1>让文字，<br />成为<span>一本书。</span></h1>
-          <p className="hero-description">从纯文本到掌中书。整理章节、挑选排版，<br className="desktop-break" />为值得收藏的故事，做一本自己的电子书。</p>
-        </div>
-        <div className="format-mark" aria-label="TXT 转 EPUB">
-          <span className="eyebrow">PLAIN TEXT. WELL DRESSED.</span>
-          <div>TXT <i className="fa-solid fa-arrow-right-long" aria-hidden="true" /></div>
-          <strong>EPUB<span>3.0</span></strong>
-          <p>你的文字，你的书架。</p>
+      <header className="header" id="top">
+        <div className="hero-copy">
+          <p className="eyebrow">A DESK FOR MANUSCRIPTS</p>
+          <h1>把原稿，<br className="desktop-break" /><span>做成一本留得住的书。</span></h1>
+          <p className="hero-description">读取 TXT、校正目录、试印版式，再把故事交给你的书架。所有处理都在这一页完成。</p>
         </div>
       </header>
-      <div className="workbench-heading"><span><i className="fa-solid fa-sliders" aria-hidden="true" /> 制书工作台</span><span>01 / 配置 &nbsp; → &nbsp; 02 / 预览 &nbsp; → &nbsp; 03 / 导出</span></div>
+      <section className="workflow" aria-label="制书流程">
+        <div className="workflow-title"><span className="eyebrow">制作流程</span><strong>你的书，正在这里成形</strong></div>
+        <ol className="workflow-steps">
+          <li className={workflowStep === 1 ? "is-current" : workflowStep > 1 ? "is-done" : ""}><span>01</span><div><b>放入原稿</b><small>TXT 与书籍信息</small></div></li>
+          <li className={workflowStep === 2 ? "is-current" : workflowStep > 2 ? "is-done" : ""}><span>02</span><div><b>校样与目录</b><small>检查章节和版式</small></div></li>
+          <li className={workflowStep === 3 ? "is-current" : ""}><span>03</span><div><b>装订导出</b><small>下载 EPUB 文件</small></div></li>
+        </ol>
+      </section>
 
       <div className="workspace">
         {/* 左侧：表单操作区 */}
@@ -277,13 +279,13 @@ function App() {
         
         <div className="reading-workspace">
           <PresetPreview key={presetId} presetId={presetId} />
-          <section className="chapter-workspace">
+          <section className={`chapter-workspace ${sections.length ? "is-ready" : "is-empty"}`}>
             <ChapterList
               sections={sections}
               selectedIndex={selectedSectionIndex}
               onSelect={setSelectedSectionIndex}
             />
-            <div className="chapter-detail">
+            <div className={`chapter-detail ${selectedSection ? "is-editable" : "is-empty"}`}>
               {selectedSection && <SectionEditor
                 key={`${selectedSectionIndex}-${editRevision}-${file?.name}-${encoding}-${presetId}`}
                 section={selectedSection}
