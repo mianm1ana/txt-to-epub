@@ -66,4 +66,4 @@ createEpub 接受可选 cover，图片写入 OEBPS/images/cover.jpg 或 png；�
 测试覆盖图片签名/大小、JPEG/PNG 包字节、OPF 元数据和 spine 顺序、导航入口、无封面回归、空内容与非法格式。浏览器检查初始布局与交互。
 
 ## 预设实现
-src/presets/ 以各自模块提供内置「欲语」与「微澜」预设，index.js 注册并维持 classic-novel 为默认值；二者保留 parseBookSections 默认接口，使用共享 utils/book-render.js 生成 XHTML。createEpub 接受可选 presetId，未知 id 报错。预览仅将外部 style.css 链接替换为同源预设内联样式。示例由 sampleText 经预设 parse 得出并提供简介/卷首/章节切换，且样张默认展开。PresetPreview 位于主工作区上方，实际章节预览也复用渲染；切换预设清空 sections/Blob。桌面章节工作台将目录、230 px 的纠错区和剩余高度的预览区分为独立滚动面；窄屏改为纵向堆叠。预设为可信内置代码，不允许用户注入脚本。测试检查默认兼容、注册表有效性、示例及实际输出同源和 XML 转义、封面回归。
+src/presets/ 以各自模块提供内置「欲语」「微澜」「霁青」「长夜」与「花笺」五个预设，index.js 按此顺序注册并维持 classic-novel 为默认值；各预设保留 parseBookSections 默认接口，使用共享 utils/book-render.js 生成 XHTML。createEpub 接受可选 presetId，未知 id 报错。预览仅将外部 style.css 链接替换为同源预设内联样式。示例由 sampleText 经预设 parse 得出并提供简介/卷首/章节切换，且样张默认展开。PresetPreview 位于主工作区上方，实际章节预览也复用渲染；切换预设清空 sections/Blob。桌面章节工作台将目录、230 px 的纠错区和剩余高度的预览区分为独立滚动面；窄屏改为纵向堆叠。预设为可信内置代码，不允许用户注入脚本。测试检查默认兼容、注册表有效性、示例及实际输出同源和 XML 转义、封面回归。

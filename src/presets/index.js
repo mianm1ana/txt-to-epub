@@ -1,7 +1,16 @@
 import { classicPreset } from "./classic.js";
 import { ripplePreset } from "./ripple.js";
+import { clearJadePreset } from "./clear-jade.js";
+import { longNightPreset } from "./long-night.js";
+import { flowerLetterPreset } from "./flower-letter.js";
 
-export const PRESETS = [classicPreset, ripplePreset];
+export const PRESETS = [
+    classicPreset,
+    ripplePreset,
+    clearJadePreset,
+    longNightPreset,
+    flowerLetterPreset,
+];
 export const DEFAULT_PRESET_ID = classicPreset.id;
 
 export function getPreset(id = DEFAULT_PRESET_ID) {
