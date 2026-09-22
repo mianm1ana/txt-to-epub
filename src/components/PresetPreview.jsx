@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { createPreviewDocument, getPreset } from '../presets/index.js';
 
-function PresetPreview({ presetId }) {
+function PresetPreview({ presetId, hasBook }) {
     const [sampleIndex, setSampleIndex] = useState(3);
-    const [sampleExpanded, setSampleExpanded] = useState(true);
+    const [sampleState, setSampleState] = useState({ hasBook, expanded: !hasBook });
     const preset = getPreset(presetId);
     const samples = preset.parse(preset.sampleText);
     const selectedIndex = Math.min(sampleIndex, samples.length - 1);
     const labels = { intro: '简介', part: '部首页', volume: '卷首', chapter: '章节正文' };
 
+    const sampleExpanded = sampleState.hasBook === hasBook ? sampleState.expanded : !hasBook;
+
     return (
-        <section className="preset-preview" aria-label="预设美化示例">
+        <section className="preset-preview" aria-label="排版预设预览">
             <div className="preset-preview-heading">
                 <div>
-                    <p className="eyebrow">02 / THE READING ROOM</p>
-                    <h2>{preset.name}<span className="preset-tag">美化示例</span></h2>
+                    <h2><span className="section-index" aria-hidden="true">02</span>{preset.name}<span className="preset-tag">排版预设</span></h2>
                     <p>无需上传文件即可查看。示例与导出共用排版，阅读器的字体和分页可能略有不同。</p>
                 </div>
                 <label className="field">
@@ -24,10 +25,10 @@ function PresetPreview({ presetId }) {
                     </select>
                 </label>
             </div>
-            <button className="sample-toggle" type="button" onClick={() => setSampleExpanded(value => !value)} aria-expanded={sampleExpanded} aria-controls="sample-body">
-                <span>查看排版样张</span><span>{sampleExpanded ? '收起' : '打开'}</span>
+            <button className="sample-toggle" type="button" onClick={() => setSampleState({ hasBook, expanded: !sampleExpanded })} aria-expanded={sampleExpanded} aria-controls="sample-body">
+                <span>排版样张</span><span>{sampleExpanded ? '收起' : '展开'} <i className="fa-solid fa-chevron-down" aria-hidden="true" /></span>
             </button>
-            <div className="sample-body" id="sample-body">
+            <div className="sample-body" id="sample-body" hidden={!sampleExpanded}>
                 <div className="paper-stage">
                     <div className="paper-caption"><span>排版样张 / SPECIMEN</span><span>{String(selectedIndex + 1).padStart(2, '0')} / {String(samples.length).padStart(2, '0')}</span></div>
                     <iframe

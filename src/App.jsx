@@ -16,7 +16,13 @@ import { editSection, mergeWithPrevious } from './utils/section-edit.js';
 import { DEFAULT_PRESET_ID, getPreset } from './presets/index.js';
 import PresetPreview from './components/PresetPreview';
 
-
+function getStatusTone(status) {
+  if (!status) return "idle";
+  if (/正在/.test(status)) return "working";
+  if (/失败|请选择|没有可转换/.test(status)) return "error";
+  if (/成功|已完成/.test(status)) return "success";
+  return "info";
+}
 
 function App() {
   // --- 页面状态 ---
@@ -227,6 +233,7 @@ function App() {
 
   const selectedSection = sections[selectedSectionIndex];
   const workflowStep = epubBlob ? 3 : file ? 2 : 1;
+  const statusTone = getStatusTone(status);
 
   // --- 界面 ---
   return (
@@ -237,17 +244,19 @@ function App() {
       </nav>
       <header className="header" id="top">
         <div className="hero-copy">
-          <p className="eyebrow">A DESK FOR MANUSCRIPTS</p>
-          <h1>把原稿，<br className="desktop-break" /><span>做成一本留得住的书。</span></h1>
+          <h1>
+            <span className="hero-line hero-line--ink"><span>把原稿，</span></span>
+            <span className="hero-line hero-line--accent"><span>做成一本留得住的书。</span></span>
+          </h1>
           <p className="hero-description">读取 TXT、校正目录、试印版式，再把故事交给你的书架。所有处理都在这一页完成。</p>
         </div>
       </header>
       <section className="workflow" aria-label="制书流程">
-        <div className="workflow-title"><span className="eyebrow">制作流程</span><strong>你的书，正在这里成形</strong></div>
+        <div className="workflow-title"><strong>制书三步</strong><span>你的书，正在这里成形</span></div>
         <ol className="workflow-steps">
-          <li className={workflowStep === 1 ? "is-current" : workflowStep > 1 ? "is-done" : ""}><span>01</span><div><b>放入原稿</b><small>TXT 与书籍信息</small></div></li>
-          <li className={workflowStep === 2 ? "is-current" : workflowStep > 2 ? "is-done" : ""}><span>02</span><div><b>校样与目录</b><small>检查章节和版式</small></div></li>
-          <li className={workflowStep === 3 ? "is-current" : ""}><span>03</span><div><b>装订导出</b><small>下载 EPUB 文件</small></div></li>
+          <li aria-current={workflowStep === 1 ? "step" : undefined} className={workflowStep === 1 ? "is-current" : workflowStep > 1 ? "is-done" : ""}><span>01</span><div><b>放入原稿</b><small>TXT 与书籍信息</small></div></li>
+          <li aria-current={workflowStep === 2 ? "step" : undefined} className={workflowStep === 2 ? "is-current" : workflowStep > 2 ? "is-done" : ""}><span>02</span><div><b>校样与目录</b><small>检查章节和版式</small></div></li>
+          <li aria-current={workflowStep === 3 ? "step" : undefined} className={workflowStep === 3 ? "is-current" : ""}><span>03</span><div><b>装订导出</b><small>下载 EPUB 文件</small></div></li>
         </ol>
       </section>
 
@@ -269,6 +278,7 @@ function App() {
           canGenerate={Boolean(file) && !coverLoading}
           canDownload={Boolean(epubBlob) && !coverLoading}
           status={status}
+          statusTone={statusTone}
           onFileChange={handleFileChange}
           onEncodingChange={handleEncodingChange}
           onTitleChange={setTitle}
@@ -278,7 +288,7 @@ function App() {
         />
         
         <div className="reading-workspace">
-          <PresetPreview key={presetId} presetId={presetId} />
+          <PresetPreview key={presetId} presetId={presetId} hasBook={sections.length > 0} />
           <section className={`chapter-workspace ${sections.length ? "is-ready" : "is-empty"}`}>
             <ChapterList
               sections={sections}
