@@ -6,7 +6,7 @@ function ChapterList({ sections, selectedIndex, onSelect }) {
             <div className="contents-heading"><h2>章节目录 <span>{String(sections.length).padStart(2, "0")}</span></h2></div>
 
             {sections.length === 0 ? (
-                <div className="contents-empty"><i className="fa-solid fa-list-ul" aria-hidden="true" /><p>目录静候故事</p><small>先在左侧选择 TXT，<br />再点击“开始制作 EPUB”。</small></div>
+                <div className="contents-empty"><i className="fa-solid fa-list-ul" aria-hidden="true" /><p>生成后显示目录</p></div>
             ): (
                 buildHierarchy(sections).map(({ section, index, depth }) => (
                     <button

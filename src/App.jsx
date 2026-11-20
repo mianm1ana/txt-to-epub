@@ -56,7 +56,7 @@ function App() {
     setEditHistory([]);
     setSelectedSectionIndex(0);
     setEpubBlob(null);
-    setStatus("生成预设已更改，请重新生成 EPUB");
+    setStatus("预设已更改，请重新生成");
   }
 
   function applySectionEdit(nextSections, nextIndex = selectedSectionIndex) {
@@ -65,7 +65,7 @@ function App() {
     setSelectedSectionIndex(nextIndex);
     setEditRevision(value => value + 1);
     setEpubBlob(null);
-    setStatus("章节已修正，请点击“生成 EPUB”导出修改后的内容");
+    setStatus("已修改，请重新生成");
   }
 
   function undoSectionEdit() {
@@ -76,7 +76,7 @@ function App() {
     setEditHistory(history => history.slice(0, -1));
     setEditRevision(value => value + 1);
     setEpubBlob(null);
-    setStatus("已撤销上次修改，请重新生成 EPUB");
+    setStatus("已撤销，请重新生成");
   }
 
   async function handleCoverChange(event) {
@@ -89,7 +89,7 @@ function App() {
       const nextCover = await readCover(selected);
       setCover(nextCover);
       setEpubBlob(null);
-      setStatus("封面已更新，点击“生成 EPUB”应用封面");
+      setStatus("封面已更新，请重新生成");
     } catch (error) {
       setCoverError(error.message);
     } finally {
@@ -101,7 +101,7 @@ function App() {
     setCover(null);
     setCoverError("");
     setEpubBlob(null);
-    setStatus("封面已移除，请重新生成 EPUB");
+    setStatus("封面已移除，请重新生成");
   }
 
   /**
@@ -137,7 +137,7 @@ function App() {
       setTitle(selectedFile.name.replace(/\.txt$/i, ""));
     }
 
-    setStatus(`已选择 ${selectedFile.name}，点击“生成 EPUB”开始解析`);
+    setStatus(`已选择 ${selectedFile.name}`);
   }
 
   /**
@@ -153,7 +153,7 @@ function App() {
       setEditHistory([]);
       setSelectedSectionIndex(0);
       setEpubBlob(null);
-      setStatus("文本编码已更改，点击“生成 EPUB”重新解析");
+      setStatus("编码已更改，请重新生成");
     }
   }
 
@@ -173,7 +173,7 @@ function App() {
 
     setConverting(true);
     setEpubBlob(null);
-    setStatus(sections.length ? "正在按当前目录生成 EPUB..." : "正在解析 TXT 并生成 EPUB...");
+    setStatus("正在生成...");
 
     try {
       // Reuse the corrected structure instead of overwriting it by reparsing TXT.
@@ -204,7 +204,7 @@ function App() {
       });
 
       setEpubBlob(blob); // 保存生成的EPUB Blob对象,方便预览或下载
-      setStatus(`EPUB 生成成功（${getPreset(presetId).name}），共 ${partCount} 部、${volumeCount} 卷、${chapterCount} 章`);
+      setStatus(`生成成功：${partCount} 部 · ${volumeCount} 卷 · ${chapterCount} 章`);
     }catch (error) {
       console.error(error);
       setStatus(`生成EPUB失败: ${error.message}`);
@@ -248,15 +248,14 @@ function App() {
             <span className="hero-line hero-line--ink"><span>把原稿，</span></span>
             <span className="hero-line hero-line--accent"><span>做成一本留得住的书。</span></span>
           </h1>
-          <p className="hero-description">读取 TXT、校正目录、试印版式，再把故事交给你的书架。所有处理都在这一页完成。</p>
         </div>
       </header>
       <section className="workflow" aria-label="制书流程">
-        <div className="workflow-title"><strong>制书三步</strong><span>你的书，正在这里成形</span></div>
+        <div className="workflow-title"><strong>制书三步</strong></div>
         <ol className="workflow-steps">
-          <li aria-current={workflowStep === 1 ? "step" : undefined} className={workflowStep === 1 ? "is-current" : workflowStep > 1 ? "is-done" : ""}><span>01</span><div><b>放入原稿</b><small>TXT 与书籍信息</small></div></li>
-          <li aria-current={workflowStep === 2 ? "step" : undefined} className={workflowStep === 2 ? "is-current" : workflowStep > 2 ? "is-done" : ""}><span>02</span><div><b>校样与目录</b><small>检查章节和版式</small></div></li>
-          <li aria-current={workflowStep === 3 ? "step" : undefined} className={workflowStep === 3 ? "is-current" : ""}><span>03</span><div><b>装订导出</b><small>下载 EPUB 文件</small></div></li>
+          <li aria-current={workflowStep === 1 ? "step" : undefined} className={workflowStep === 1 ? "is-current" : workflowStep > 1 ? "is-done" : ""}><span>01</span><div><b>放入原稿</b></div></li>
+          <li aria-current={workflowStep === 2 ? "step" : undefined} className={workflowStep === 2 ? "is-current" : workflowStep > 2 ? "is-done" : ""}><span>02</span><div><b>校样与目录</b></div></li>
+          <li aria-current={workflowStep === 3 ? "step" : undefined} className={workflowStep === 3 ? "is-current" : ""}><span>03</span><div><b>装订导出</b></div></li>
         </ol>
       </section>
 
@@ -311,7 +310,7 @@ function App() {
           </section>
         </div>
       </div>
-      <footer className="footer"><span>纸间 / PAPERWORK</span><p>好故事，值得好好排版。</p><span>TXT → EPUB · 全程本地处理</span></footer>
+      <footer className="footer"><span>纸间 / PAPERWORK</span><span>TXT → EPUB</span></footer>
     </main>
   );
 }

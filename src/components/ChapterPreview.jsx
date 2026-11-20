@@ -10,7 +10,7 @@ function ChapterPreview({ section, presetId }) {
                     sandbox=""
                     srcDoc={createPreviewDocument(section, presetId)}
                 />
-            ) : <div className="reading-empty"><span className="empty-number" aria-hidden="true">Aa</span><h2>下一页，是你的故事。</h2><p>选择 TXT 并生成 EPUB 后，<br />在目录中挑一章查看实际排版。</p></div>}
+            ) : <div className="reading-empty"><span className="empty-number" aria-hidden="true">Aa</span><h2>下一页，是你的故事。</h2><p>生成后在目录中选章预览</p></div>}
         </section>
     );
 }

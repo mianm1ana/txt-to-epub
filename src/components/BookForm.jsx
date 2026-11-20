@@ -26,12 +26,12 @@ function BookForm({
 }) {
     return (
         <form className="form" onSubmit={onGenerate}>
-            <div className="form-section-heading"><span className="section-number" aria-hidden="true">01</span><div><h2>放入原稿</h2><p>从原始文本到可校样的书稿</p></div></div>
+            <div className="form-section-heading"><span className="section-number" aria-hidden="true">01</span><div><h2>放入原稿</h2></div></div>
             <fieldset className="form-group">
                 <legend className="group-label">原稿设置</legend>
                 <label className="field upload-field">
                     <span>TXT 文件</span>
-                    <span className="upload-prompt"><i className="fa-solid fa-arrow-up-from-bracket" aria-hidden="true" /><strong>{fileName || "选择你的原稿"}</strong><small>{fileName ? "点击更换 TXT 文件" : "TXT 格式 · 点击选择文件"}</small></span>
+                    <span className="upload-prompt"><i className="fa-solid fa-arrow-up-from-bracket" aria-hidden="true" /><strong>{fileName || "选择你的原稿"}</strong><small>{fileName ? "点击更换" : "TXT 格式"}</small></span>
 
                     <input
                         type="file"
@@ -93,7 +93,7 @@ function BookForm({
             </fieldset>
 
             <details className="cover-field" open={Boolean(cover || coverLoading || coverError)}>
-                <summary className="group-label"><span>封面（可选）</span><small>添加图片 <i className="fa-solid fa-chevron-down" aria-hidden="true" /></small></summary>
+                <summary className="group-label"><span>封面（可选）</span><small><i className="fa-solid fa-chevron-down" aria-hidden="true" /></small></summary>
                 <div className="cover-content">
                     <label className="field cover-upload">
                         <span>封面图片</span>
@@ -103,10 +103,8 @@ function BookForm({
                             accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                             disabled={converting || coverLoading}
                             onChange={onCoverChange}
-                            aria-describedby="cover-hint"
                         />
                     </label>
-                    <p id="cover-hint" className="cover-hint">建议使用竖版图片；导出时将保留原始比例。</p>
                     {coverLoading && <p role="status">正在读取封面...</p>}
                     {coverError && <p className="cover-error" role="alert">{coverError}</p>}
                     {cover && (
@@ -126,7 +124,7 @@ function BookForm({
                     disabled={converting || !canGenerate}
                     aria-busy={converting}
                 >
-                    <span>{converting ? "正在解析并生成..." : "开始制作 EPUB"}</span> <i className="fa-solid fa-arrow-right" aria-hidden="true" />
+                    <span>{converting ? "正在生成..." : "生成 EPUB"}</span> <i className="fa-solid fa-arrow-right" aria-hidden="true" />
                 </button>
 
                 <button
@@ -135,10 +133,10 @@ function BookForm({
                     disabled={converting || !canDownload}
                     onClick={onDownload}
                 >
-                    <i className="fa-solid fa-arrow-down" aria-hidden="true" /> 下载已完成的书
+                    <i className="fa-solid fa-arrow-down" aria-hidden="true" /> 下载 EPUB
                 </button>
                 <div className={`status status--${statusTone}`} role={statusTone === "error" ? "alert" : "status"} aria-live="polite">
-                    {status || "等待原稿：选择一个 TXT 文件开始。"}
+                    {status || "请选择 TXT 文件"}
                 </div>
             </div>
         </form>

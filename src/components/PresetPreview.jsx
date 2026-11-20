@@ -16,7 +16,6 @@ function PresetPreview({ presetId, hasBook }) {
             <div className="preset-preview-heading">
                 <div>
                     <h2><span className="section-index" aria-hidden="true">02</span>{preset.name}<span className="preset-tag">排版预设</span></h2>
-                    <p>无需上传文件即可查看。示例与导出共用排版，阅读器的字体和分页可能略有不同。</p>
                 </div>
                 <label className="field">
                     <span>示例页面</span>
@@ -37,10 +36,10 @@ function PresetPreview({ presetId, hasBook }) {
                         sandbox=""
                         srcDoc={createPreviewDocument(samples[selectedIndex], presetId)}
                     />
-                    <div className="paper-bottom">{preset.name} <span>·</span> 为长篇阅读而设计</div>
+                    <div className="paper-bottom">{preset.name}</div>
                 </div>
                 <details className="preset-rules">
-                    <summary>查看 TXT 划分规则与示例原文</summary>
+                    <summary>划分规则与示例原文</summary>
                     <ul>{preset.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
                     <pre>{preset.sampleText}</pre>
                 </details>
