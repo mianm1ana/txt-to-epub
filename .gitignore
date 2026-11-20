@@ -25,3 +25,6 @@ dist-ssr!
 
 AGENTS.md
 .playwright-mcp
+
+# graphify knowledge graph output
+graphify-out/
