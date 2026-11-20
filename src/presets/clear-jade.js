@@ -31,7 +31,6 @@ body {
     max-width: 37em;
     margin: 0 auto;
     padding: 0 1.25em 3em;
-    background: #f7faf6;
     color: #263d38;
     font-family: serif;
     font-size: 100%;
